@@ -51,11 +51,14 @@ function Referral() {
           referralEarnings: data.user.referralEarnings || 0,
         });
 
-        const referralRes = await fetch("http://localhost:5000/api/referrals", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+        const referralRes = await fetch(
+          "https://tasklumo-backend.vercel.app/api/referrals",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           },
-        });
+        );
 
         const referralData = await referralRes.json();
 

@@ -65,11 +65,14 @@ export default function LuckySpin() {
   const loadUser = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "https://tasklumo-backend.vercel.app/api/auth/me",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       const data = await res.json();
       if (data.success) {
         setCoins(data.user.coins);
@@ -130,13 +133,16 @@ export default function LuckySpin() {
       setResult(null);
 
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/lucky-spin/spin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "https://tasklumo-backend.vercel.app/api/lucky-spin/spin",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       const data = await res.json();
 
       if (!data.success) {

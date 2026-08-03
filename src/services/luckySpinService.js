@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/lucky-spin";
+const API = "https://tasklumo-backend.vercel.app/api/lucky-spin";
 
 export const spinLuckyWheel = async (token) => {
   const res = await axios.post(

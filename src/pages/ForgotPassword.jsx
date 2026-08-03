@@ -38,7 +38,7 @@ function ForgotPassword() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password/send-otp",
+        "https://tasklumo-backend.vercel.app/api/auth/forgot-password/send-otp",
         {
           email,
         },
@@ -60,7 +60,7 @@ function ForgotPassword() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password/verify-otp",
+        "https://tasklumo-backend.vercel.app/api/auth/forgot-password/verify-otp",
         {
           email,
           otp,
@@ -93,7 +93,7 @@ function ForgotPassword() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password/reset-password",
+        "https://tasklumo-backend.vercel.app/api/auth/forgot-password/reset-password",
         {
           email,
           password,

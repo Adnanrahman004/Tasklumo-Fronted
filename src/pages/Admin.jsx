@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 // TaskLumo — Admin.jsx (single file, dark theme, JWT auth, no mock data)
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://tasklumo-backend.vercel.app/";
 const api = axios.create({ baseURL: API_BASE_URL });
 
 const MENU_ITEMS = [

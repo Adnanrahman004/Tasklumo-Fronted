@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/admin";
+const API = "https://tasklumo-backend.vercel.app/api/admin";
 
 const getToken = () => {
   return localStorage.getItem("adminToken");

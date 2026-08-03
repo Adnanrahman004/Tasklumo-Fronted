@@ -114,21 +114,24 @@ function Support() {
       setSubmitting(true);
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5000/api/support/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "https://tasklumo-backend.vercel.app/api/support/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            uid,
+            issueType,
+            priority,
+            message,
+          }),
         },
-        body: JSON.stringify({
-          name,
-          email,
-          uid,
-          issueType,
-          priority,
-          message,
-        }),
-      });
+      );
 
       const data = await res.json();
 
@@ -159,11 +162,14 @@ function Support() {
       setLoadingRequests(true);
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5000/api/support/my-tickets", {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "https://tasklumo-backend.vercel.app/api/support/my-tickets",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       const data = await res.json();
 
