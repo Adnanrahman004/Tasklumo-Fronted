@@ -5,7 +5,7 @@ import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Tasks from "./pages/Tasks";
 import Wallet from "./pages/Wallet";
-import Profile from "./pages/Profile";
+import Profile from "./pages/profile";
 import Referral from "./pages/Referral";
 import SupportChat from "./pages/SupportChat";
 import LuckySpin from "./pages/LuckySpin";
