@@ -166,7 +166,7 @@ function Register() {
             >
               <img
                 src={logo}
-                alt="TaskLumo Logo"
+                alt="TaskNiri Logo"
                 className="w-full h-full rounded-full object-cover border-[2px] border-[#0a0a0a]"
               />
             </div>
@@ -176,7 +176,7 @@ function Register() {
               </h1>
               <p className="text-[#a1a1aa] text-[10.5px] sm:text-[11.5px] m-0 mt-0.5 flex items-center gap-1">
                 <ShieldCheck size={11} className="text-[#facc15] shrink-0" />
-                Join TaskLumo &amp; start earning
+                Join TaskNiri &amp; start earning
               </p>
             </div>
           </div>

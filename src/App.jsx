@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // USER PAGES
 import Landing from "./pages/Landing";
@@ -23,6 +23,9 @@ import Notification from "./pages/Notification";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
 
+// PROTECTED ROUTE
+import ProtectedRoute from "./components/ProtectedRoute";
+
 function App() {
   return (
     <BrowserRouter>
@@ -35,24 +38,100 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* User Pages */}
-        <Route path="/home" element={<Home />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/referral" element={<Referral />} />
-        <Route path="/support-chat" element={<SupportChat />} />
-        <Route path="/lucky-spin" element={<LuckySpin />} />
+        {/* Protected User Pages */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Information */}
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <Tasks />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/wallet"
+          element={
+            <ProtectedRoute>
+              <Wallet />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/referral"
+          element={
+            <ProtectedRoute>
+              <Referral />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/support-chat"
+          element={
+            <ProtectedRoute>
+              <SupportChat />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/lucky-spin"
+          element={
+            <ProtectedRoute>
+              <LuckySpin />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/notification"
+          element={
+            <ProtectedRoute>
+              <Notification />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Public Information Pages */}
         <Route path="/about" element={<About />} />
         <Route path="/support" element={<Support />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
-        <Route path="/notification" element={<Notification />} />
+
+        {/* Admin */}
         <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/admin" element={<Admin />} />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Invalid URL redirect */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -12,7 +12,7 @@ function About() {
         {/* LOGO */}
         <img
           src={logo}
-          alt="TaskLumo Logo"
+          alt="TaskNiri Logo"
           className="w-[65px] h-[65px] md:w-[85px] md:h-[85px] rounded-full object-cover mb-[14px]
             border-2 border-[rgba(250,204,21,0.25)] shadow-[0_0_20px_rgba(250,204,21,0.35)] inline-block"
         />
@@ -21,11 +21,11 @@ function About() {
           className="text-[28px] md:text-[40px] font-black mb-[10px]
             bg-gradient-to-r from-[#facc15] to-white bg-clip-text text-transparent"
         >
-          About TaskLumo
+          About TaskNiri
         </h1>
 
         <p className="text-[#a1a1aa] text-[10px] md:text-[13px] leading-6 max-w-[700px] mx-auto">
-          Learn more about TaskLumo, our mission, vision, rewards system, and
+          Learn more about TaskNiri, our mission, vision, rewards system, and
           future goals.
         </p>
       </div>
@@ -37,10 +37,10 @@ function About() {
       >
         {/* ABOUT */}
         <h2 className="text-[#facc15] text-[18px] md:text-[24px] mb-3 font-extrabold">
-          🚀 About TaskLumo
+          🚀 About TaskNiri
         </h2>
         <p className="text-[#d4d4d8] text-[10px] md:text-[12px] leading-[26px] mb-[26px]">
-          TaskLumo is a modern online earning and rewards platform created to
+          TaskNiri is a modern online earning and rewards platform created to
           help users earn real rewards through simple digital activities such as
           tasks, surveys, app installs, referrals, promotions, and
           engagement-based systems.
@@ -51,7 +51,7 @@ function About() {
           activities, collect reward coins, and manage earnings securely.
           <br />
           <br />
-          TaskLumo focuses on creating a clean and trusted earning ecosystem
+          TaskNiri focuses on creating a clean and trusted earning ecosystem
           where users can enjoy a rewarding online experience without
           complicated systems.
         </p>
@@ -69,7 +69,7 @@ function About() {
           simple activities without confusing processes or difficult systems.
           <br />
           <br />
-          TaskLumo aims to build a trusted community-driven rewards platform
+          TaskNiri aims to build a trusted community-driven rewards platform
           that delivers fair opportunities, smooth experiences, and long-term
           growth.
         </p>
@@ -79,7 +79,7 @@ function About() {
           💰 What We Offer
         </h2>
         <p className="text-[#d4d4d8] text-[10px] md:text-[12px] leading-[26px] mb-[26px]">
-          TaskLumo offers multiple earning opportunities including daily tasks,
+          TaskNiri offers multiple earning opportunities including daily tasks,
           reward bonuses, surveys, app testing, promotional offers, referral
           rewards, and engagement systems.
           <br />
@@ -94,10 +94,10 @@ function About() {
 
         {/* WHY CHOOSE */}
         <h2 className="text-[#facc15] text-[18px] md:text-[24px] mb-3 font-extrabold">
-          ⭐ Why Choose TaskLumo
+          ⭐ Why Choose TaskNiri
         </h2>
         <p className="text-[#d4d4d8] text-[10px] md:text-[12px] leading-[26px] mb-[26px]">
-          TaskLumo is built with modern design, mobile responsiveness, fast
+          TaskNiri is built with modern design, mobile responsiveness, fast
           performance, and smooth navigation systems.
           <br />
           <br />
@@ -128,7 +128,7 @@ function About() {
           🔥 Future Goals
         </h2>
         <p className="text-[#d4d4d8] text-[10px] md:text-[12px] leading-[26px] mb-[26px]">
-          TaskLumo is continuously evolving to introduce better earning systems,
+          TaskNiri is continuously evolving to introduce better earning systems,
           smarter engagement features, and improved reward opportunities.
           <br />
           <br />
@@ -141,7 +141,7 @@ function About() {
           ❤️ Thank You
         </h2>
         <p className="text-[#d4d4d8] text-[10px] md:text-[12px] leading-[26px] mb-[10px]">
-          Thank you for supporting TaskLumo and being part of our growing
+          Thank you for supporting TaskNiri and being part of our growing
           journey.
           <br />
           <br />

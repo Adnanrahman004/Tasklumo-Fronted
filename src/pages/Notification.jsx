@@ -32,7 +32,7 @@ const initialNotifications = [
     id: 1,
     group: "Today",
     type: "welcome",
-    title: "Welcome to TaskLumo",
+    title: "Welcome to TaskNiri",
     message:
       "Thanks for joining. Your first project is ready whenever you are.",
     time: "2m ago",

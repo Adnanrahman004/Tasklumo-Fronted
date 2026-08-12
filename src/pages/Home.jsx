@@ -45,11 +45,11 @@ function Home() {
 
   const [coins, setCoins] = useState(0);
   const [xp, setXp] = useState(
-    () => Number(localStorage.getItem("tasklumoXp")) || 40,
+    () => Number(localStorage.getItem("taskniriXp")) || 40,
   );
   const [streak, setStreak] = useState(1);
   const [lastClaim, setLastClaim] = useState(
-    () => localStorage.getItem("tasklumoLastClaim") || "",
+    () => localStorage.getItem("taskniriLastClaim") || "",
   );
   const [coinPulse, setCoinPulse] = useState(false);
   const [tickerIndex, setTickerIndex] = useState(0);
@@ -85,20 +85,20 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("tasklumoCoins", coins);
+    localStorage.setItem("taskniriCoins", coins);
   }, [coins]);
 
   useEffect(() => {
-    localStorage.setItem("tasklumoXp", xp);
+    localStorage.setItem("taskniriXp", xp);
   }, [xp]);
 
   useEffect(() => {
-    localStorage.setItem("tasklumoStreak", streak);
+    localStorage.setItem("taskniriStreak", streak);
   }, [streak]);
 
   // Jab bhi user Lucky Spin page se wapas Home pe aaye, coins ko localStorage se refresh kar lo
   useEffect(() => {
-    const latest = Number(localStorage.getItem("tasklumoCoins")) || 0;
+    const latest = Number(localStorage.getItem("taskniriCoins")) || 0;
     if (latest !== coins) {
       setCoins(latest);
       pulseCoins();
@@ -132,7 +132,7 @@ function Home() {
     setCoins((c) => c + 20);
     setXp((x) => x + 10);
     setLastClaim(getToday());
-    localStorage.setItem("tasklumoLastClaim", getToday());
+    localStorage.setItem("taskniriLastClaim", getToday());
     pulseCoins();
     showPopup(`Day ${newStreak} streak — 20 coins added`);
   };
@@ -209,7 +209,7 @@ function Home() {
       key: "support",
       icon: MessageCircle,
       title: "Support Chat",
-      desc: "Chat with TaskLumo support instantly.",
+      desc: "Chat with TaskNiri support instantly.",
       btn: "Open Chat",
       to: "/support-chat",
     },
@@ -293,7 +293,7 @@ function Home() {
           className="text-[15px] font-extrabold bg-gradient-to-r from-[#facc15] to-white bg-clip-text text-transparent m-0 mb-2 tracking-wide"
           style={{ animation: "fadeInUp 0.4s ease both" }}
         >
-          Loading TaskLumo
+          Loading TaskNiri
         </p>
 
         <div
@@ -373,7 +373,7 @@ function Home() {
 
         <div className="relative z-10 flex justify-between items-center mb-[14px] gap-[10px]">
           <h1 className="text-[clamp(24px,7vw,40px)] font-extrabold bg-gradient-to-r from-[#facc15] to-white bg-clip-text text-transparent m-0 tracking-tight shrink-0">
-            TASKLUMO
+            TaskNiri
           </h1>
           <div className="flex items-center gap-[6px] sm:gap-[7px] shrink-0">
             {/* 40px tap target, kept visually tight via icon-only pill */}
@@ -464,7 +464,7 @@ function Home() {
             Earn Rewards Faster
           </h2>
           <p className="relative text-[#a1a1aa] leading-[21px] mb-4 max-w-[680px] text-[12px]">
-            Welcome to TaskLumo — complete daily tasks, invite friends, claim
+            Welcome to TaskNiri — complete daily tasks, invite friends, claim
             bonuses, and earn reward coins instantly.
           </p>
           <Link to="/tasks" className="relative inline-block no-underline">

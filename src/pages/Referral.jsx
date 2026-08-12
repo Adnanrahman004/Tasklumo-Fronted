@@ -169,7 +169,7 @@ function Referral() {
     },
     {
       title: "Friend joins",
-      desc: "They sign up on TaskLumo using your referral link.",
+      desc: "They sign up on TaskNiri using your referral link.",
     },
     {
       title: "Both earn",
@@ -187,8 +187,8 @@ function Referral() {
     if (navigator.share) {
       navigator
         .share({
-          title: "TaskLumo",
-          text: "Join TaskLumo and earn rewards daily using my referral link.",
+          title: "TaskNiri",
+          text: "Join TaskNiri and earn rewards daily using my referral link.",
           url: referralLink,
         })
         .catch(() => {});
@@ -199,7 +199,7 @@ function Referral() {
 
   const shareOnWhatsApp = () => {
     const text = encodeURIComponent(
-      `Join TaskLumo and earn rewards daily using my referral link: ${referralLink}`,
+      `Join TaskNiri and earn rewards daily using my referral link: ${referralLink}`,
     );
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };

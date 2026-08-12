@@ -11,7 +11,7 @@ function Terms() {
   const termsData = [
     {
       title: "1. Acceptance of Terms",
-      text: "By accessing or using TaskLumo, users agree to comply with all platform rules, policies, guidelines, and applicable laws. Continued use of the platform indicates acceptance of these Terms & Conditions.",
+      text: "By accessing or using TaskNiri, users agree to comply with all platform rules, policies, guidelines, and applicable laws. Continued use of the platform indicates acceptance of these Terms & Conditions.",
     },
     {
       title: "2. User Eligibility",
@@ -23,7 +23,7 @@ function Terms() {
     },
     {
       title: "4. Rewards & Earnings",
-      text: "TaskLumo provides reward opportunities through tasks, surveys, advertisements, referrals, and promotional activities. Rewards may vary depending on offer availability, advertiser verification, and platform policies.",
+      text: "TaskNiri provides reward opportunities through tasks, surveys, advertisements, referrals, and promotional activities. Rewards may vary depending on offer availability, advertiser verification, and platform policies.",
     },
     {
       title: "5. Withdrawal Policy",
@@ -43,27 +43,27 @@ function Terms() {
     },
     {
       title: "9. Platform Availability",
-      text: "We work continuously to maintain platform stability and performance. However, TaskLumo does not guarantee uninterrupted availability due to maintenance, technical updates, or external service interruptions.",
+      text: "We work continuously to maintain platform stability and performance. However, TaskNiri does not guarantee uninterrupted availability due to maintenance, technical updates, or external service interruptions.",
     },
     {
       title: "10. Account Suspension",
-      text: "TaskLumo reserves the right to temporarily suspend or permanently terminate accounts involved in suspicious, fraudulent, abusive, or policy-violating activities without prior notice.",
+      text: "TaskNiri reserves the right to temporarily suspend or permanently terminate accounts involved in suspicious, fraudulent, abusive, or policy-violating activities without prior notice.",
     },
     {
       title: "11. Intellectual Property",
-      text: "All TaskLumo branding, logos, designs, platform content, graphics, and system elements remain the property of TaskLumo and may not be copied or reused without authorization.",
+      text: "All TaskNiri branding, logos, designs, platform content, graphics, and system elements remain the property of TaskLumo and may not be copied or reused without authorization.",
     },
     {
       title: "12. Changes to Terms",
-      text: "TaskLumo may modify or update these Terms & Conditions at any time to improve platform functionality, security, legal compliance, or operational policies.",
+      text: "TaskNiri may modify or update these Terms & Conditions at any time to improve platform functionality, security, legal compliance, or operational policies.",
     },
     {
       title: "13. Limitation of Liability",
-      text: "TaskLumo is not responsible for losses, delays, third-party service issues, advertiser actions, internet interruptions, or technical problems beyond platform control.",
+      text: "TaskNiri is not responsible for losses, delays, third-party service issues, advertiser actions, internet interruptions, or technical problems beyond platform control.",
     },
     {
       title: "14. Contact & Support",
-      text: "Users may contact the official TaskLumo support team for assistance related to account issues, withdrawals, rewards, platform guidance, or policy-related questions.",
+      text: "Users may contact the official TaskNiri support team for assistance related to account issues, withdrawals, rewards, platform guidance, or policy-related questions.",
     },
   ];
 
@@ -101,14 +101,14 @@ function Terms() {
         <div className="text-center mb-[22px]">
           <img
             src={logo}
-            alt="TaskLumo Logo"
+            alt="TaskNiri Logo"
             className="w-16 h-16 sm:w-[84px] sm:h-[84px] rounded-full object-cover border-2 border-[#f5c451]/[0.35] shadow-[0_0_28px_rgba(245,196,81,0.4)] mb-[14px] mx-auto"
           />
           <h2 className="text-[#f5c451] text-[26px] sm:text-[34px] lg:text-[40px] font-black tracking-[-0.02em] m-0 mb-[10px]">
             Terms & Conditions
           </h2>
           <p className="text-[#a8a8b3] text-[12px] sm:text-[12.5px] leading-[1.9] max-w-[640px] mx-auto">
-            Please read these Terms & Conditions carefully before using TaskLumo
+            Please read these Terms & Conditions carefully before using TaskNiri
             services. These terms explain platform rules, account
             responsibilities, reward systems, security policies, and acceptable
             platform usage guidelines.
@@ -142,7 +142,7 @@ function Terms() {
               "Users must follow all platform rules and community guidelines.",
               "Fake activity, spam behavior, or fraudulent usage is strictly prohibited.",
               "Rewards and withdrawals are subject to verification and advertiser approval systems.",
-              "Continued use of TaskLumo indicates agreement with all platform policies and terms.",
+              "Continued use of TaskNiri indicates agreement with all platform policies and terms.",
             ].map((li, i) => (
               <li
                 key={i}

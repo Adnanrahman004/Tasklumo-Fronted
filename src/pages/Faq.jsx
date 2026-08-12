@@ -8,9 +8,9 @@ function Faq() {
 
   const faqData = [
     {
-      question: "How do I get free coins on TaskLumo?",
+      question: "How do I get free coins on TaskNiri?",
       answer:
-        "You can earn coins by completing tasks, surveys, and app installs from your Tasks page. Use these coins to withdraw real cash. You can also earn coins by inviting your friends to try TaskLumo.",
+        "You can earn coins by completing tasks, surveys, and app installs from your Tasks page. Use these coins to withdraw real cash. You can also earn coins by inviting your friends to try TaskNiri.",
     },
     {
       question: "How do I invite my friends and earn coins?",
@@ -21,7 +21,7 @@ function Faq() {
       question:
         "I invited my friends but don't see any increase in coins, why?",
       answer:
-        "You can earn coins by inviting friends, just make sure: a) Your friends install TaskLumo from your exclusive invite link only. b) Your friends complete at least one task successfully from TaskLumo. The amount of coins for the invite program may change from time to time.",
+        "You can earn coins by inviting friends, just make sure: a) Your friends install TaskNiri from your exclusive invite link only. b) Your friends complete at least one task successfully from TaskNiri. The amount of coins for the invite program may change from time to time.",
     },
     {
       question: "I did not get my withdrawal, why?",
@@ -36,7 +36,7 @@ function Faq() {
     {
       question: "How do I know my referral link and how can I use it?",
       answer:
-        "Every user has a unique referral link with which they can invite others to join TaskLumo and earn extra coin rewards. You can find your referral link on the Invite & Earn page, and share it directly via WhatsApp, Facebook, or by copying the link.",
+        "Every user has a unique referral link with which they can invite others to join TaskNiri and earn extra coin rewards. You can find your referral link on the Invite & Earn page, and share it directly via WhatsApp, Facebook, or by copying the link.",
     },
     {
       question:
@@ -50,9 +50,9 @@ function Faq() {
         "Tasks may be rejected if instructions were not completed fully or if our ad partner could not verify completion. Contact support with the task name and your UID for a manual review.",
     },
     {
-      question: "Is TaskLumo free to use?",
+      question: "Is TaskNiri free to use?",
       answer:
-        "Yes, TaskLumo is completely free to use with no joining fee, subscription, or investment required at any step.",
+        "Yes, TaskNiri is completely free to use with no joining fee, subscription, or investment required at any step.",
     },
     {
       question: "How can I contact support?",
@@ -120,7 +120,7 @@ function Faq() {
         <p className="text-[#d4d4d8] text-[11.5px] leading-[21px] m-0 mb-[22px] text-center">
           Hey, we tried to answer all your queries below. In case you need any
           assistance at any point of time, please write to us at{" "}
-          <span className="text-[#facc15] font-bold">wecare@tasklumo.work</span>
+          <span className="text-[#facc15] font-bold">wecare@taskniri.work</span>
         </p>
 
         {faqData.map((faq, index) => (

@@ -9,7 +9,7 @@ const policyData = [
     id: "introduction",
     icon: "👋",
     title: "1. Introduction",
-    text: "TaskLumo values user privacy and is committed to protecting personal information. This Privacy Policy explains how we collect, store, manage, and protect user data while you use our platform and services. By using TaskLumo, you agree to the practices described below.",
+    text: "TaskNiri values user privacy and is committed to protecting personal information. This Privacy Policy explains how we collect, store, manage, and protect user data while you use our platform and services. By using TaskNiri, you agree to the practices described below.",
   },
   {
     id: "information-we-collect",
@@ -27,13 +27,13 @@ const policyData = [
     id: "cookies-tracking",
     icon: "🍪",
     title: "4. Cookies & Tracking",
-    text: "TaskLumo may use cookies and analytics tools to improve website functionality, maintain user sessions, analyze traffic, personalize experiences, and strengthen our security systems.",
+    text: "TaskNiri may use cookies and analytics tools to improve website functionality, maintain user sessions, analyze traffic, personalize experiences, and strengthen our security systems.",
   },
   {
     id: "third-party-services",
     icon: "🔗",
     title: "5. Third-Party Services",
-    text: "Some surveys, offers, advertisements, payment gateways, and promotional services available on TaskLumo may be managed by third-party partners. These services may have their own separate privacy policies and terms.",
+    text: "Some surveys, offers, advertisements, payment gateways, and promotional services available on TaskNiri may be managed by third-party partners. These services may have their own separate privacy policies and terms.",
   },
   {
     id: "account-security",
@@ -57,7 +57,7 @@ const policyData = [
     id: "data-sharing",
     icon: "🤝",
     title: "9. Data Sharing",
-    text: "TaskLumo does not sell personal user information. Limited information may only be shared with trusted partners, payment providers, or legal authorities when required for platform operations or legal compliance.",
+    text: "TaskNiri does not sell personal user information. Limited information may only be shared with trusted partners, payment providers, or legal authorities when required for platform operations or legal compliance.",
   },
   {
     id: "data-retention",
@@ -75,7 +75,7 @@ const policyData = [
     id: "children-privacy",
     icon: "🚸",
     title: "12. Children's Privacy",
-    text: "TaskLumo services are not intended for children below the legal minimum age in their country or region. We do not knowingly collect personal data from underage users.",
+    text: "TaskNiri services are not intended for children below the legal minimum age in their country or region. We do not knowingly collect personal data from underage users.",
   },
   {
     id: "policy-updates",
@@ -87,7 +87,7 @@ const policyData = [
     id: "contact",
     icon: "📩",
     title: "14. Contact Information",
-    text: "Users may contact the TaskLumo support team regarding privacy concerns, account security, or policy questions using the official support system or support email.",
+    text: "Users may contact the TaskNiri support team regarding privacy concerns, account security, or policy questions using the official support system or support email.",
   },
 ];
 
@@ -159,7 +159,7 @@ function Privacy() {
           <div className="w-[76px] h-[76px] min-[960px]:w-24 min-[960px]:h-24 mx-auto mb-4 rounded-full overflow-hidden border-2 border-[#facc15]/25 shadow-[0_0_22px_rgba(250,204,21,0.35)]">
             <img
               src={logo}
-              alt="TaskLumo Logo"
+              alt="TaskNiri Logo"
               className="w-full h-full object-cover"
             />
           </div>
@@ -168,7 +168,7 @@ function Privacy() {
           </h1>
           <p className="text-[#a1a1aa] text-[12.5px] sm:text-[13px] leading-[1.8] max-w-[640px] mx-auto mb-3">
             Your privacy, account security, and personal data protection matter
-            to us. This policy explains how TaskLumo collects, stores, protects,
+            to us. This policy explains how TaskNiri collects, stores, protects,
             and manages your information while you use our platform.
           </p>
           <span className="inline-flex items-center gap-1.5 text-[10.5px] text-[#71717a] bg-white/[0.03] border border-white/[0.06] px-3 py-[5px] rounded-full">
@@ -222,7 +222,7 @@ function Privacy() {
             {/* TRUST BOX */}
             <div className="rounded-2xl p-[18px] mb-[22px] bg-gradient-to-br from-[#facc15]/[0.08] to-white/[0.02] border border-[#facc15]/[0.08]">
               <h2 className="text-[#facc15] text-[17px] font-extrabold m-0 mb-3">
-                Why Users Trust TaskLumo
+                Why Users Trust TaskNiri
               </h2>
               <div>
                 <div className="mb-[10px]">
@@ -295,7 +295,7 @@ function Privacy() {
                 </div>
                 <div className="mb-0">
                   <p className="text-[#d4d4d8] text-[11px] leading-[1.9] m-0">
-                    • Contact official TaskLumo support for any suspicious
+                    • Contact official TaskNiri support for any suspicious
                     activity.
                   </p>
                 </div>

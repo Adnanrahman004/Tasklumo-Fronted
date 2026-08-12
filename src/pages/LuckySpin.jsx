@@ -55,7 +55,7 @@ export default function LuckySpin() {
   const [bestWin, setBestWin] = useState(0);
   const [history, setHistory] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("tasklumoSpinHistory") || "[]");
+      return JSON.parse(localStorage.getItem("taskNiriSpinHistory") || "[]");
     } catch {
       return [];
     }

@@ -27,8 +27,18 @@ import {
 } from "lucide-react";
 
 function Profile() {
-  const location = useLocation();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login", { replace: true });
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+
+  const location = useLocation();
   const [profile, setProfile] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -134,11 +144,6 @@ function Profile() {
     } finally {
       setPasswordLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
   };
 
   const handleReset = () => {
@@ -292,25 +297,18 @@ function Profile() {
         <div className="fixed inset-0 opacity-[0.04] bg-[linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
 
         <div className="relative w-[110px] h-[110px] flex items-center justify-center mb-6">
-          {/* soft glow behind everything */}
           <div
             className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(250,204,21,0.35),transparent_70%)] blur-[6px]"
             style={{ animation: "pulseGlow 1.6s ease-in-out infinite" }}
           />
-
-          {/* outer ring */}
           <div
             className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#facc15] border-r-[#facc15]/40"
             style={{ animation: "spinRing 1.1s linear infinite" }}
           />
-
-          {/* inner ring, opposite direction */}
           <div
             className="absolute inset-[14px] rounded-full border-[3px] border-transparent border-b-[#ff9d3d] border-l-[#ff9d3d]/40"
             style={{ animation: "spinRingReverse 1.4s linear infinite" }}
           />
-
-          {/* center coin */}
           <div
             className="relative w-11 h-11 rounded-full bg-gradient-to-br from-[#facc15] to-[#ffb300] text-black flex items-center justify-center shadow-[0_0_18px_rgba(250,204,21,0.5)]"
             style={{ animation: "floatCoin 1.6s ease-in-out infinite" }}
@@ -351,7 +349,6 @@ function Profile() {
       bg-[radial-gradient(circle_at_bottom_left,rgba(255,120,40,0.35),transparent_35%),radial-gradient(circle_at_top_right,rgba(255,140,0,0.22),transparent_28%),linear-gradient(135deg,#050505_0%,#0a0a0a_40%,#120909_100%)]`}
       style={{ paddingTop: "max(16px, env(safe-area-inset-top))" }}
     >
-      {/* keyframes Tailwind's stock utilities can't express */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-6px); }
@@ -378,7 +375,6 @@ function Profile() {
         className="relative z-0"
         style={{ animation: "pageFadeIn 0.35s ease both" }}
       >
-        {/* faint grid texture for depth, matches the rest of the app */}
         <div className="fixed inset-0 opacity-[0.04] bg-[linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
 
         <div className="relative z-20 flex justify-between items-center mb-[18px] gap-2">

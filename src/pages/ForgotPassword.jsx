@@ -180,7 +180,7 @@ function ForgotPassword() {
               </h1>
               <p className="text-[#a1a1aa] text-[10.5px] sm:text-[11.5px] m-0 mt-1 flex items-center gap-1">
                 <ShieldCheck size={11} className="text-[#facc15] shrink-0" />
-                Recover your TaskLumo account
+                Recover your TaskNiri account
               </p>
             </div>
           </div>

@@ -19,7 +19,7 @@ function SupportChat() {
   const [messages, setMessages] = useState([
     {
       from: "bot",
-      text: "Hey! I'm Lumo, your TaskLumo assistant. What can I help you with today?",
+      text: "Hey! I'm Lumo, your TaskNiri assistant. What can I help you with today?",
       time: "now",
     },
   ]);
@@ -78,7 +78,7 @@ function SupportChat() {
     {
       keywords: ["hi", "hii", "hlo", "hyy", "hello", "hey", "yo", "namaste"],
       reply:
-        "Hey! I'm Lumo, your TaskLumo assistant. What can I help you with today — withdrawal, tasks, referrals, or something else?",
+        "Hey! I'm Lumo, your TaskNiri assistant. What can I help you with today — withdrawal, tasks, referrals, or something else?",
     },
     {
       keywords: ["thank", "thanks", "tysm", "thx", "thank you"],
@@ -199,7 +199,7 @@ function SupportChat() {
     {
       keywords: ["spin", "lucky spin", "wheel", "how to get spin"],
       reply:
-        "You get 1 free Lucky Spin for every friend you refer who joins TaskLumo. Keep inviting friends to keep spinning and winning bonus coins!",
+        "You get 1 free Lucky Spin for every friend you refer who joins TaskNiri. Keep inviting friends to keep spinning and winning bonus coins!",
     },
     {
       keywords: [
@@ -273,7 +273,7 @@ function SupportChat() {
     {
       keywords: ["phishing", "suspicious link", "suspicious message"],
       reply:
-        "Please don't click links from unknown sources claiming to be TaskLumo. We never ask for your password or OTP over chat or email. Report any suspicious message to us immediately.",
+        "Please don't click links from unknown sources claiming to be TaskNiri. We never ask for your password or OTP over chat or email. Report any suspicious message to us immediately.",
     },
     {
       keywords: ["refund"],
@@ -301,7 +301,7 @@ function SupportChat() {
     {
       keywords: ["storage", "app size", "cache", "clear data"],
       reply:
-        "If the app feels slow, try clearing its cache from your phone's Settings > Apps > TaskLumo > Storage > Clear Cache. This won't affect your coins or account, only temporary files.",
+        "If the app feels slow, try clearing its cache from your phone's Settings > Apps > TaskNiri > Storage > Clear Cache. This won't affect your coins or account, only temporary files.",
     },
     {
       keywords: ["vpn", "location", "country", "region locked"],
@@ -311,17 +311,17 @@ function SupportChat() {
     {
       keywords: ["notification"],
       reply:
-        "You can manage task and reward notifications from your phone's Settings > Apps > TaskLumo > Notifications. Let me know if you're missing reward alerts specifically and I'll check your account.",
+        "You can manage task and reward notifications from your phone's Settings > Apps > TaskNiri > Notifications. Let me know if you're missing reward alerts specifically and I'll check your account.",
     },
     {
       keywords: ["dark mode", "theme", "light mode"],
       reply:
-        "TaskLumo currently runs in a dark, easy-on-the-eyes theme by default. A light mode option is on our roadmap — I'll pass along your interest to the product team!",
+        "TaskNiri currently runs in a dark, easy-on-the-eyes theme by default. A light mode option is on our roadmap — I'll pass along your interest to the product team!",
     },
     {
       keywords: ["language", "hindi", "change language"],
       reply:
-        "Right now TaskLumo supports English by default. We're working on adding more language options soon, including Hindi — stay tuned for updates.",
+        "Right now TaskNiri supports English by default. We're working on adding more language options soon, including Hindi — stay tuned for updates.",
     },
     {
       keywords: ["promo code", "coupon code", "gift code"],
@@ -341,7 +341,7 @@ function SupportChat() {
     {
       keywords: ["rate the app", "review", "rating"],
       reply:
-        "Thank you for considering it! You can rate TaskLumo on the Play Store from your app listing page — it really helps us grow and improve.",
+        "Thank you for considering it! You can rate TaskNiri on the Play Store from your app listing page — it really helps us grow and improve.",
     },
     {
       keywords: ["human", "real person", "agent", "talk to someone"],
@@ -356,7 +356,7 @@ function SupportChat() {
     {
       keywords: ["free", "cost", "charge", "paid app"],
       reply:
-        "TaskLumo is completely free to use — there are no hidden charges. You earn coins by completing tasks, and withdraw real money once you hit the minimum threshold.",
+        "TaskNiri is completely free to use — there are no hidden charges. You earn coins by completing tasks, and withdraw real money once you hit the minimum threshold.",
     },
     {
       keywords: ["how to earn", "earn more", "increase earning", "more coins"],
@@ -366,7 +366,7 @@ function SupportChat() {
     {
       keywords: ["age", "eligibility", "who can use"],
       reply:
-        "TaskLumo is available for users aged 18 and above. You'll need a valid email and phone number to sign up and start earning.",
+        "TaskNiri is available for users aged 18 and above. You'll need a valid email and phone number to sign up and start earning.",
     },
     {
       keywords: ["terms", "terms and conditions", "terms of service"],
@@ -391,7 +391,7 @@ function SupportChat() {
         "multiple devices",
       ],
       reply:
-        "Each user is allowed only one TaskLumo account. Multiple accounts from the same device or details may lead to suspension of all linked accounts and forfeited coins.",
+        "Each user is allowed only one TaskNiri account. Multiple accounts from the same device or details may lead to suspension of all linked accounts and forfeited coins.",
     },
     {
       keywords: [
@@ -407,7 +407,7 @@ function SupportChat() {
     {
       keywords: ["what is your name", "who are you", "what's your name"],
       reply:
-        "I'm Lumo, the AI assistant built into TaskLumo. I help with withdrawals, tasks, referrals, account issues, and pretty much anything else about the app.",
+        "I'm Lumo, the AI assistant built into TaskNiri. I help with withdrawals, tasks, referrals, account issues, and pretty much anything else about the app.",
     },
     {
       keywords: ["good morning"],
@@ -435,7 +435,7 @@ function SupportChat() {
     {
       keywords: ["i love you", "love you"],
       reply:
-        "That's sweet of you! I'm just an assistant, but I really do want to help make your TaskLumo experience great.",
+        "That's sweet of you! I'm just an assistant, but I really do want to help make your TaskNiri experience great.",
     },
     {
       keywords: ["what can you do", "what do you do", "your job", "help me"],
@@ -450,31 +450,31 @@ function SupportChat() {
         "are you ai",
       ],
       reply:
-        "I'm an AI assistant built specifically for TaskLumo — not a human, but I'm trained to actually solve your issues, not just chat.",
+        "I'm an AI assistant built specifically for TaskNiri — not a human, but I'm trained to actually solve your issues, not just chat.",
     },
     {
-      keywords: ["what is tasklumo", "about tasklumo", "what is this app"],
+      keywords: ["what is taskNiri", "about taskNiri", "what is this app"],
       reply:
         "TaskLumo is a gamified earning platform where you complete simple tasks — surveys, app installs, games, and more — to earn coins, which you can withdraw as real money.",
     },
     {
       keywords: [
-        "why tasklumo",
-        "why choose tasklumo",
-        "why use tasklumo",
-        "why should i use tasklumo",
+        "why taskNiri",
+        "why choose taskNiri",
+        "why use taskNiri",
+        "why should i use taskNiri",
       ],
       reply:
-        "TaskLumo stands out with instant task credits, low ₹100 withdrawal minimum, daily streak bonuses, a Lucky Spin wheel, and real cash payouts via UPI — all backed by verified ad partners.",
+        "TaskNiri stands out with instant task credits, low ₹100 withdrawal minimum, daily streak bonuses, a Lucky Spin wheel, and real cash payouts via UPI — all backed by verified ad partners.",
     },
     {
       keywords: [
-        "tasklumo review",
-        "tasklumo trustworthy",
-        "tasklumo experience",
+        "taskNiri review",
+        "taskNiri trustworthy",
+        "taskNiri experience",
       ],
       reply:
-        "Thousands of users complete tasks and withdraw earnings on TaskLumo daily. We focus on fast payouts and genuine ad partners to keep the experience reliable.",
+        "Thousands of users complete tasks and withdraw earnings on TaskNiri daily. We focus on fast payouts and genuine ad partners to keep the experience reliable.",
     },
     {
       keywords: ["how does it work", "how to use", "how to start"],
@@ -489,7 +489,7 @@ function SupportChat() {
         "genuine app",
       ],
       reply:
-        "Yes, TaskLumo is a genuine platform with verified ad partners and secure withdrawals. We never ask for your password or OTP outside the app.",
+        "Yes, TaskNiri is a genuine platform with verified ad partners and secure withdrawals. We never ask for your password or OTP outside the app.",
     },
     {
       keywords: ["contact number", "phone number", "call support"],
@@ -499,7 +499,7 @@ function SupportChat() {
     {
       keywords: ["office", "company address", "where are you located"],
       reply:
-        "TaskLumo operates online and primarily supports users through the app and email — we don't have a public walk-in office at the moment.",
+        "TaskNiri operates online and primarily supports users through the app and email — we don't have a public walk-in office at the moment.",
     },
     {
       keywords: ["wrong upi", "wrong details", "typo in upi"],
@@ -529,7 +529,7 @@ function SupportChat() {
     {
       keywords: ["minimum age", "under 18", "am i eligible"],
       reply:
-        "TaskLumo requires users to be 18 or older to sign up and withdraw earnings, in line with our eligibility policy.",
+        "TaskNiri requires users to be 18 or older to sign up and withdraw earnings, in line with our eligibility policy.",
     },
     {
       keywords: ["how much can i earn", "max earning", "earning potential"],
@@ -554,7 +554,7 @@ function SupportChat() {
     {
       keywords: ["two accounts merge", "merge account", "combine account"],
       reply:
-        "Unfortunately accounts can't be merged. Each TaskLumo account is tied individually to one user for security and fairness reasons.",
+        "Unfortunately accounts can't be merged. Each TaskNiri account is tied individually to one user for security and fairness reasons.",
     },
     {
       keywords: [
@@ -591,7 +591,7 @@ function SupportChat() {
     {
       keywords: ["what's up", "whats up", "sup"],
       reply:
-        "Not much, just here helping TaskLumo users! What's up with you — anything I can help with?",
+        "Not much, just here helping TaskNiri users! What's up with you — anything I can help with?",
     },
     {
       keywords: ["joke", "tell me a joke"],
@@ -752,7 +752,7 @@ function SupportChat() {
     {
       keywords: ["subscription", "premium plan", "vip membership"],
       reply:
-        "TaskLumo doesn't currently have a paid subscription or VIP tier — all task earning features are free for every user.",
+        "TaskNiri doesn't currently have a paid subscription or VIP tier — all task earning features are free for every user.",
     },
     {
       keywords: ["ads too many", "too many ads", "annoying ads"],
@@ -1878,7 +1878,7 @@ function SupportChat() {
         </div>
 
         <div className="app-footer">
-          <p className="footer-brand">TaskLumo</p>
+          <p className="footer-brand">TaskNiri</p>
           <p className="footer-tagline">
             Earn real rewards by completing simple everyday tasks — surveys, app
             installs, games, and more. Trusted by thousands of users across
@@ -1904,7 +1904,7 @@ function SupportChat() {
           </div>
 
           <p className="footer-copy">
-            © {new Date().getFullYear()} TaskLumo. All rights reserved. Made
+            © {new Date().getFullYear()} TaskNiri. All rights reserved. Made
             with ❤️ in India.
           </p>
         </div>
