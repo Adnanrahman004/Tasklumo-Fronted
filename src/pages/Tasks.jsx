@@ -259,6 +259,22 @@ function Tasks() {
           .task-grid { grid-template-columns: 1fr !important; }
         }
         .cat-scroll::-webkit-scrollbar { display: none; }
+        .task-btn {
+          background: linear-gradient(135deg, #facc15, #eab308);
+          border: none;
+          padding: 9px 0;
+          border-radius: 9px;
+          font-weight: 700;
+          cursor: pointer;
+          margin-top: 10px;
+          color: #000;
+          font-size: 11px;
+          box-shadow: 0 0 12px rgba(250,204,21,0.18);
+          transition: transform 0.15s ease;
+          width: 100%;
+          font-family: Poppins, sans-serif;
+        }
+        .task-btn:hover { transform: translateY(-2px); }
       `}</style>
 
       <div
@@ -341,6 +357,7 @@ function Tasks() {
             {visibleTasks.map((t) => {
               const Icon = t.icon;
               const isBest = t.key === bestRewardKey;
+              const isApps = t.key === "apps";
               return (
                 <div
                   className={`relative bg-[#111111]/[0.88] border rounded-2xl p-[14px] sm:p-4 max-[359px]:p-[11px] backdrop-blur-[18px] shadow-[0_0_18px_rgba(250,204,21,0.05)] transition-all duration-[250ms] flex flex-col justify-between min-h-[165px] sm:min-h-[195px] max-[359px]:min-h-[155px] cursor-pointer animate-[cardIn_0.4s_ease_both] hover:-translate-y-1 hover:border-[#facc15]/35 ${
@@ -374,17 +391,33 @@ function Tasks() {
                       {t.desc}
                     </p>
 
-                    <div className="flex items-center gap-1 text-[#a1a1aa] text-[9px] mt-2">
-                      <Clock size={11} /> {t.time}
-                    </div>
+                    {!isApps && (
+                      <div className="flex items-center gap-1 text-[#a1a1aa] text-[9px] mt-2">
+                        <Clock size={11} /> {t.time}
+                      </div>
+                    )}
                   </div>
 
-                  <button
-                    onClick={() => handleTaskClick(t)}
-                    className={`bg-gradient-to-br from-[#facc15] to-[#eab308] border-none py-[9px] rounded-[9px] font-bold cursor-pointer mt-[10px] text-black text-[11px] shadow-[0_0_12px_rgba(250,204,21,0.18)] transition-transform duration-150 w-full hover:-translate-y-0.5 ${FONT}`}
-                  >
-                    {t.action}
-                  </button>
+                  {isApps ? (
+                    <button
+                      onClick={() =>
+                        window.open(
+                          "https://www.fastsvr.com/wall/URFTg",
+                          "_blank",
+                        )
+                      }
+                      className="task-btn"
+                    >
+                      Install App Tasks
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleTaskClick(t)}
+                      className={`bg-gradient-to-br from-[#facc15] to-[#eab308] border-none py-[9px] rounded-[9px] font-bold cursor-pointer mt-[10px] text-black text-[11px] shadow-[0_0_12px_rgba(250,204,21,0.18)] transition-transform duration-150 w-full hover:-translate-y-0.5 ${FONT}`}
+                    >
+                      {t.action}
+                    </button>
+                  )}
                 </div>
               );
             })}
