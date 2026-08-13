@@ -6,13 +6,11 @@ import {
   Home as HomeIcon,
   ClipboardList,
   Wallet as WalletIcon,
-  BarChart3,
   Megaphone,
   Video,
   Download,
   Coins,
   Clock,
-  Flame,
   ShieldCheck,
   X,
   Sparkles,
@@ -25,10 +23,6 @@ function Tasks() {
   const FONT = "font-[Poppins,sans-serif]";
 
   const [coins, setCoins] = useState(0);
-  const completedToday = 5;
-  const totalToday = 12;
-  const progressPct = Math.round((completedToday / totalToday) * 100);
-  const coinsEarnedToday = 185;
 
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -71,16 +65,6 @@ function Tasks() {
 
   const tasks = [
     {
-      key: "survey",
-      icon: BarChart3,
-      title: "Survey",
-      desc: "Complete surveys and earn coins.",
-      reward: 50,
-      time: "5 min",
-      action: "Start",
-      category: "survey",
-    },
-    {
       key: "ads",
       icon: Megaphone,
       title: "Ads",
@@ -103,7 +87,7 @@ function Tasks() {
     {
       key: "apps",
       icon: Download,
-      title: "Apps",
+      title: "Apps and Survey",
       desc: "Install apps and earn coins.",
       reward: 80,
       time: "1 min",
@@ -118,10 +102,9 @@ function Tasks() {
 
   const categories = [
     { key: "all", label: "All", icon: LayoutGrid },
-    { key: "survey", label: "Survey", icon: BarChart3 },
     { key: "ads", label: "Ads", icon: Megaphone },
     { key: "videos", label: "Videos", icon: Video },
-    { key: "apps", label: "Apps", icon: Download },
+    { key: "apps", label: "Apps and Survey", icon: Download },
   ];
 
   const visibleTasks =
@@ -301,32 +284,6 @@ function Tasks() {
           </div>
         </div>
 
-        <div className="relative z-10 bg-[#111111]/[0.88] border border-[#facc15]/10 rounded-[18px] px-[18px] py-4 mb-4 backdrop-blur-[18px] animate-[cardIn_0.4s_ease_both]">
-          <div className="flex justify-between items-center mb-[10px]">
-            <p className="text-[12px] font-bold m-0 flex items-center gap-1.5">
-              <Flame size={14} color="#facc15" /> Today's progress
-            </p>
-            <span className="text-[12px] text-[#facc15] font-bold">
-              {completedToday}/{totalToday}
-            </span>
-          </div>
-          <div className="w-full h-2 rounded-md bg-white/[0.06] overflow-hidden">
-            <div
-              className="h-full rounded-md bg-gradient-to-r from-[#facc15] to-[#eab308] transition-[width] duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-[#a1a1aa] text-[10px] m-0">
-              Finish {totalToday - completedToday} more tasks today to keep your
-              streak alive.
-            </p>
-            <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-[#facc15] bg-[#facc15]/10 px-2 py-[3px] rounded-full whitespace-nowrap">
-              <Coins size={10} /> +{coinsEarnedToday} today
-            </span>
-          </div>
-        </div>
-
         <div className="relative z-10 flex gap-[8px] mb-4 overflow-x-auto cat-scroll -mx-4 px-4 sm:mx-0 sm:px-0">
           {categories.map((c) => {
             const CatIcon = c.icon;
@@ -404,7 +361,7 @@ function Tasks() {
                       onClick={() => navigate("/offerwall")}
                       className="task-btn"
                     >
-                      Install App Tasks
+                      Install App
                     </button>
                   ) : (
                     <button
