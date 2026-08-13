@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getProfile } from "../services/authServices";
 import {
@@ -21,6 +21,7 @@ import {
 
 function Tasks() {
   const location = useLocation();
+  const navigate = useNavigate();
   const FONT = "font-[Poppins,sans-serif]";
 
   const [coins, setCoins] = useState(0);
@@ -400,12 +401,7 @@ function Tasks() {
 
                   {isApps ? (
                     <button
-                      onClick={() =>
-                        window.open(
-                          "https://www.fastsvr.com/wall/URFTg",
-                          "_blank",
-                        )
-                      }
+                      onClick={() => navigate("/offerwall")}
                       className="task-btn"
                     >
                       Install App Tasks

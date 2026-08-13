@@ -26,6 +26,8 @@ import Admin from "./pages/Admin";
 // PROTECTED ROUTE
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import OfferwallPage from "./pages/OfferwallPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -117,6 +119,8 @@ function App() {
         <Route path="/faq" element={<Faq />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+
+        <Route path="/offerwall" element={<OfferwallPage />} />
 
         {/* Admin */}
         <Route path="/admin-login" element={<AdminLogin />} />
