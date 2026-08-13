@@ -32,6 +32,41 @@ function Tasks() {
   // actual tasks content is revealed.
   const [pageLoading, setPageLoading] = useState(true);
 
+  // HTML injected into a sandboxed iframe for the ad banner. This network's
+  // script relies on document.write, which only works reliably inside its
+  // own isolated document — injecting it directly into the React-rendered
+  // page can silently fail or wipe page content. srcDoc keeps it contained.
+  const adBannerSrcDoc = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            overflow: hidden;
+          }
+        </style>
+      </head>
+      <body>
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '88debce4dde98bdb18a2c1485dae4b3b',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="https://www.highperformanceformat.com/88debce4dde98bdb18a2c1485dae4b3b/invoke.js"></script>
+      </body>
+    </html>
+  `;
+
   useEffect(() => {
     const timer = setTimeout(() => setPageLoading(false), 500);
     return () => clearTimeout(timer);
@@ -376,6 +411,17 @@ function Tasks() {
             })}
           </div>
         )}
+
+        <div className="relative z-10 flex justify-center items-center mt-2 mb-2">
+          <iframe
+            title="ad-banner"
+            srcDoc={adBannerSrcDoc}
+            width="320"
+            height="50"
+            style={{ border: "none", background: "transparent" }}
+            scrolling="no"
+          />
+        </div>
 
         <div
           className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-[420px] h-16 bg-[#111111]/90 border border-[#facc15]/[0.12] rounded-[22px] flex justify-around items-center backdrop-blur-[18px] shadow-[0_0_25px_rgba(0,0,0,0.35)]"
