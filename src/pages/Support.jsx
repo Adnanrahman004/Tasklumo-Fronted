@@ -53,7 +53,7 @@ const FAQS = [
     a: "The minimum withdrawal amount is ₹100. Once your wallet balance crosses that, the withdraw option unlocks automatically.",
   },
   {
-    q: "Is TaskLumo free to use?",
+    q: "Is TaskNiri free to use?",
     a: "Yes, completely free. There are no hidden charges — you simply complete tasks to earn coins and withdraw once you hit the minimum threshold.",
   },
 ];
