@@ -15,6 +15,7 @@ import {
   X,
   Sparkles,
   LayoutGrid,
+  FileText,
 } from "lucide-react";
 
 function Tasks() {
@@ -30,6 +31,8 @@ function Tasks() {
   const [activeCategory, setActiveCategory] = useState("all");
 
   const [pageLoading, setPageLoading] = useState(true);
+  const [showCPXSurvey, setShowCPXSurvey] = useState(false);
+  const [cpxUrl, setCpxUrl] = useState("");
 
   // Ad banner ka script hardcoded 728x90 maangta hai — width/height ko
   // directly chhota karne se ad load hi nahi hota. Isliye asli size
@@ -146,6 +149,37 @@ function Tasks() {
     setShowPopup(true);
   };
 
+  // secure_hash abhi intentionally frontend me nahi daala hai — CPX Research
+  // ke docs ke hisaab se yeh MD5(ext_user_id + secret_key) hota hai, aur
+  // secret_key sirf backend par hi rehna chahiye. Jab backend endpoint ready
+  // ho jaye jo signed URL (ya sirf secure_hash) return kare, tab yahan use
+  // wire karna hoga.
+  const openCPXSurvey = async () => {
+    try {
+      const data = await getProfile();
+      const user = data.user;
+      // Tumhare backend user ka unique ID
+      const uniqueUserId = user.userId || user.uid || user.id || user._id;
+      if (!uniqueUserId) {
+        alert("User ID nahi mila. Please login again.");
+        return;
+      }
+      const url =
+        `https://offers.cpx-research.com/index.php` +
+        `?app_id=35548` +
+        `&ext_user_id=${encodeURIComponent(uniqueUserId)}` +
+        `&username=${encodeURIComponent(user.username || "")}` +
+        `&email=${encodeURIComponent(user.email || "")}` +
+        `&subid_1=` +
+        `&subid_2=`;
+      setCpxUrl(url);
+      setShowCPXSurvey(true);
+    } catch (error) {
+      console.error("CPX Survey error:", error);
+      alert("Survey open nahi ho raha. Please try again.");
+    }
+  };
+
   const navItems = [
     { to: "/home", icon: HomeIcon, label: "Home" },
     { to: "/tasks", icon: ClipboardList, label: "Tasks" },
@@ -153,6 +187,8 @@ function Tasks() {
     { to: "/profile", icon: User, label: "Profile" },
   ];
 
+  // "direct" tasks navigate straight to a route instead of opening the
+  // "coming soon" popup — same pattern as the Apps and Survey card.
   const tasks = [
     {
       key: "ads",
@@ -183,6 +219,19 @@ function Tasks() {
       time: "1 min",
       action: "Install",
       category: "apps",
+      direct: true,
+      route: "/offerwall",
+    },
+    {
+      key: "survey",
+      icon: FileText,
+      title: "Complete Survey",
+      desc: "Complete survey, earn coin.",
+      reward: 50,
+      time: "3 min",
+      action: "Open Survey",
+      category: "survey",
+      cpx: true,
     },
   ];
 
@@ -195,6 +244,7 @@ function Tasks() {
     { key: "ads", label: "Ads", icon: Megaphone },
     { key: "videos", label: "Videos", icon: Video },
     { key: "apps", label: "Apps and Survey", icon: Download },
+    { key: "survey", label: "Survey", icon: FileText },
   ];
 
   const visibleTasks =
@@ -433,7 +483,7 @@ function Tasks() {
               {visibleTasks.map((t, i) => {
                 const Icon = t.icon;
                 const isBest = t.key === bestRewardKey;
-                const isApps = t.key === "apps";
+                const isDirect = !!t.direct;
                 return (
                   <div
                     className={`task-card tn-focusable relative bg-[#111111]/[0.88] border rounded-2xl p-[clamp(13px,1.6vw,18px)] backdrop-blur-[18px] shadow-[0_0_18px_rgba(250,204,21,0.05)] flex flex-col justify-between min-h-[168px] sm:min-h-[195px] max-[359px]:min-h-[155px] cursor-pointer ${
@@ -468,19 +518,26 @@ function Tasks() {
                         {t.desc}
                       </p>
 
-                      {!isApps && (
+                      {!isDirect && (
                         <div className="flex items-center gap-1 text-[#a1a1aa] text-[9px] mt-2">
                           <Clock size={11} /> {t.time}
                         </div>
                       )}
                     </div>
 
-                    {isApps ? (
+                    {t.cpx ? (
                       <button
-                        onClick={() => navigate("/offerwall")}
+                        onClick={openCPXSurvey}
                         className="task-btn tn-focusable"
                       >
-                        View Task
+                        {t.action}
+                      </button>
+                    ) : isDirect ? (
+                      <button
+                        onClick={() => navigate(t.route)}
+                        className="task-btn tn-focusable"
+                      >
+                        {t.action}
                       </button>
                     ) : (
                       <button
@@ -552,6 +609,41 @@ function Tasks() {
             );
           })}
         </div>
+
+        {/* ---------- CPX Research Survey (full-screen) ---------- */}
+        {showCPXSurvey && cpxUrl && (
+          <div className="fixed inset-0 z-50 bg-black">
+            <div className="h-full w-full flex flex-col">
+              {/* Header */}
+              <div
+                className="h-14 shrink-0 flex items-center justify-between px-4 bg-[#111] border-b border-[#facc15]/20"
+                style={{ paddingTop: "env(safe-area-inset-top)" }}
+              >
+                <h2 className={`text-white font-bold text-sm ${FONT}`}>
+                  Complete Survey
+                </h2>
+                <button
+                  onClick={() => setShowCPXSurvey(false)}
+                  aria-label="Close survey"
+                  className="tn-focusable w-9 h-9 rounded-full bg-white/10 hover:bg-white/[0.18] text-white flex items-center justify-center transition-colors duration-150"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              {/* CPX Research */}
+              <div className="flex-1 bg-white overflow-hidden">
+                <iframe
+                  width="100%"
+                  height="2000px"
+                  frameBorder="0"
+                  src={cpxUrl}
+                  title="CPX Research Survey"
+                  className="w-full h-full border-0"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ---------- Task popup ---------- */}
         {showPopup && selectedTask && (
