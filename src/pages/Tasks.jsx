@@ -102,11 +102,6 @@ function Tasks() {
     setTimeout(() => setCoinPulse(false), 500);
   };
 
-  // Backend (Firebase) hi coins ka single source of truth hai — offerwall
-  // / CPA network jab lead complete hone par postback bhejta hai, wo
-  // seedha backend me coin likhta hai, is React tab ko koi live push nahi
-  // milta. Isliye jab bhi is page pe wapas aaya jaaye, backend se dobara
-  // poocha jaata hai (bas ek localStorage guess pe bharosa nahi karte).
   const loadProfile = async ({ silent = false } = {}) => {
     try {
       const data = await getProfile();
@@ -126,17 +121,11 @@ function Tasks() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 2) Jab bhi route badle (user Wallet/Home/Offerwall se wapas Tasks pe
-  //    aaye), fresh coins backend se dobara le lo
   useEffect(() => {
     loadProfile({ silent: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  // 3) Offerwall/CPA network aksar naya tab/window kholta hai. Jab user
-  //    us tab ko complete karke wapas is tab pe aata hai (route change
-  //    hue bina), visibility/focus event se refresh trigger karo — yehi
-  //    sabse common jagah hai jaha coin "update nahi hota" lagta hai.
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState === "visible") {
