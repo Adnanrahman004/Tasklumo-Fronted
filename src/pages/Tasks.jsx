@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getProfile } from "../services/authServices";
 import {
   User,
@@ -23,19 +23,42 @@ function Tasks() {
   const FONT = "font-[Poppins,sans-serif]";
 
   const [coins, setCoins] = useState(0);
+  const [coinPulse, setCoinPulse] = useState(false);
 
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
 
-  // Page-entry animation state — shows a 0.5s branded loader before the
-  // actual tasks content is revealed.
   const [pageLoading, setPageLoading] = useState(true);
 
-  // HTML injected into a sandboxed iframe for the ad banner. This network's
-  // script relies on document.write, which only works reliably inside its
-  // own isolated document — injecting it directly into the React-rendered
-  // page can silently fail or wipe page content. srcDoc keeps it contained.
+  // Ad banner ka script hardcoded 728x90 maangta hai — width/height ko
+  // directly chhota karne se ad load hi nahi hota. Isliye asli size
+  // fixed rakhte hain aur poore wrapper ko CSS transform:scale() se
+  // container ki available width ke hisaab se sikoड़te hain. Iframe ke
+  // baad wrapper ki height bhi scale ke hisaab se adjust hoti hai taaki
+  // scale hone ke baad neeche khaali jagah na bache.
+  const adWrapRef = useRef(null);
+  const [adScale, setAdScale] = useState(1);
+  const AD_W = 728;
+  const AD_H = 90;
+
+  useEffect(() => {
+    const computeScale = () => {
+      if (!adWrapRef.current) return;
+      const available = adWrapRef.current.offsetWidth;
+      const next = Math.min(1, available / AD_W);
+      setAdScale(next);
+    };
+    computeScale();
+    window.addEventListener("resize", computeScale);
+    return () => window.removeEventListener("resize", computeScale);
+  }, []);
+
+  // 728x90 leaderboard ad. srcDoc me isolated iframe document use kar rahe
+  // hain kyunki yeh network document.write use karta hai jo React-rendered
+  // page me directly daalne par silently fail ho jaata hai. Iframe ke
+  // andar hi width/height fixed 728x90 di gayi hai — yeh script ka apna
+  // requirement hai, ise chhote na karo warna ad load hi nahi hoga.
   const adBannerSrcDoc = `
     <!DOCTYPE html>
     <html>
@@ -44,6 +67,8 @@ function Tasks() {
           html, body {
             margin: 0;
             padding: 0;
+            width: 728px;
+            height: 90px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -55,14 +80,14 @@ function Tasks() {
       <body>
         <script type="text/javascript">
           atOptions = {
-            'key' : '88debce4dde98bdb18a2c1485dae4b3b',
+            'key' : '1daf843f1ff89f87c1aa7e1eb0a173a3',
             'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
+            'height' : 90,
+            'width' : 728,
             'params' : {}
           };
         </script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/88debce4dde98bdb18a2c1485dae4b3b/invoke.js"></script>
+        <script type="text/javascript" src="https://www.highperformanceformat.com/1daf843f1ff89f87c1aa7e1eb0a173a3/invoke.js"></script>
       </body>
     </html>
   `;
@@ -72,23 +97,64 @@ function Tasks() {
     return () => clearTimeout(timer);
   }, []);
 
+  const pulseCoins = () => {
+    setCoinPulse(true);
+    setTimeout(() => setCoinPulse(false), 500);
+  };
+
+  // Backend (Firebase) hi coins ka single source of truth hai — offerwall
+  // / CPA network jab lead complete hone par postback bhejta hai, wo
+  // seedha backend me coin likhta hai, is React tab ko koi live push nahi
+  // milta. Isliye jab bhi is page pe wapas aaya jaaye, backend se dobara
+  // poocha jaata hai (bas ek localStorage guess pe bharosa nahi karte).
+  const loadProfile = async ({ silent = false } = {}) => {
+    try {
+      const data = await getProfile();
+      setCoins((prev) => {
+        const next = data.user.coins || 0;
+        if (next !== prev) pulseCoins();
+        return next;
+      });
+    } catch (err) {
+      console.error("Failed to refresh profile from backend:", err);
+    }
+  };
+
+  // 1) Page load hote hi backend se fetch
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const data = await getProfile();
-        setCoins(data.user.coins || 0);
-      } catch (err) {
-        console.error(err);
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 2) Jab bhi route badle (user Wallet/Home/Offerwall se wapas Tasks pe
+  //    aaye), fresh coins backend se dobara le lo
+  useEffect(() => {
+    loadProfile({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // 3) Offerwall/CPA network aksar naya tab/window kholta hai. Jab user
+  //    us tab ko complete karke wapas is tab pe aata hai (route change
+  //    hue bina), visibility/focus event se refresh trigger karo — yehi
+  //    sabse common jagah hai jaha coin "update nahi hota" lagta hai.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        loadProfile({ silent: true });
       }
     };
-    loadProfile();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTaskClick = (task) => {
     setSelectedTask(task);
     setShowPopup(true);
-    // Future:
-    // Open company offerwall here
   };
 
   const navItems = [
@@ -154,7 +220,7 @@ function Tasks() {
     overflow: "hidden",
   };
 
-  // ---------- 0.5s Premium Entry Loader ----------
+  // ---------- Premium loader (identical pattern across the whole app) ----------
   if (pageLoading) {
     return (
       <div
@@ -162,30 +228,12 @@ function Tasks() {
         bg-[radial-gradient(circle_at_bottom_left,rgba(255,120,40,0.35),transparent_35%),radial-gradient(circle_at_top_right,rgba(255,140,0,0.22),transparent_28%),linear-gradient(135deg,#050505_0%,#0a0a0a_40%,#120909_100%)]`}
       >
         <style>{`
-          @keyframes spinRing {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          @keyframes spinRingReverse {
-            from { transform: rotate(360deg); }
-            to { transform: rotate(0deg); }
-          }
-          @keyframes pulseGlow {
-            0%, 100% { opacity: 0.55; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.08); }
-          }
-          @keyframes floatCoin {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-6px) rotate(180deg); }
-          }
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes dotBounce {
-            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-            40% { transform: scale(1); opacity: 1; }
-          }
+          @keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          @keyframes spinRingReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+          @keyframes pulseGlow { 0%, 100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+          @keyframes floatCoin { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(180deg); } }
+          @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes dotBounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
           @media (prefers-reduced-motion: reduce) {
             * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
           }
@@ -194,25 +242,18 @@ function Tasks() {
         <div className="fixed inset-0 opacity-[0.04] bg-[linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
 
         <div className="relative w-[110px] h-[110px] flex items-center justify-center mb-6">
-          {/* soft glow behind everything */}
           <div
             className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(250,204,21,0.35),transparent_70%)] blur-[6px]"
             style={{ animation: "pulseGlow 1.6s ease-in-out infinite" }}
           />
-
-          {/* outer ring */}
           <div
             className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#facc15] border-r-[#facc15]/40"
             style={{ animation: "spinRing 1.1s linear infinite" }}
           />
-
-          {/* inner ring, opposite direction */}
           <div
             className="absolute inset-[14px] rounded-full border-[3px] border-transparent border-b-[#ff9d3d] border-l-[#ff9d3d]/40"
             style={{ animation: "spinRingReverse 1.4s linear infinite" }}
           />
-
-          {/* center coin */}
           <div
             className="relative w-11 h-11 rounded-full bg-gradient-to-br from-[#facc15] to-[#ffb300] text-black flex items-center justify-center shadow-[0_0_18px_rgba(250,204,21,0.5)]"
             style={{ animation: "floatCoin 1.6s ease-in-out infinite" }}
@@ -249,180 +290,256 @@ function Tasks() {
 
   return (
     <div
-      className={`min-h-screen min-h-[100dvh] p-4 pb-[105px] sm:p-5 text-white ${FONT}
+      className={`min-h-screen min-h-[100dvh] text-white ${FONT}
       bg-[radial-gradient(circle_at_bottom_left,rgba(255,120,40,0.35),transparent_35%),radial-gradient(circle_at_top_right,rgba(255,140,0,0.22),transparent_28%),linear-gradient(135deg,#050505_0%,#0a0a0a_40%,#120909_100%)]`}
-      style={{ paddingTop: "max(16px, env(safe-area-inset-top))" }}
     >
-      {/* keyframe Tailwind's stock utilities can't express */}
+      {/* Shared responsive tokens — same system as Home.jsx so the whole
+          app scales identically between phone and laptop instead of
+          feeling like two different products. */}
       <style>{`
-        @keyframes cardIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes overlayIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes popupIn {
-          from { opacity: 0; transform: translateY(16px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes pageFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+        :root { --ease-premium: cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popupIn { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         @media (prefers-reduced-motion: reduce) {
-          * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+          * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+        }
+
+        .tn-shell {
+          max-width: 1180px;
+          margin: 0 auto;
+          padding: clamp(16px, 3vw, 32px) clamp(16px, 4vw, 40px) clamp(110px, 13vh, 130px);
+          padding-top: max(clamp(16px, 3vw, 32px), env(safe-area-inset-top));
+        }
+        .task-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: clamp(10px, 1.6vw, 16px);
+        }
+        @media (min-width: 640px) {
+          .task-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 1024px) {
+          .task-grid { grid-template-columns: repeat(4, 1fr); }
         }
         @media (max-width: 340px) {
-          .task-grid { grid-template-columns: 1fr !important; }
+          .task-grid { grid-template-columns: 1fr; }
         }
+
         .cat-scroll::-webkit-scrollbar { display: none; }
+
+        .task-card {
+          transition: transform 0.35s var(--ease-premium), box-shadow 0.35s var(--ease-premium), border-color 0.35s var(--ease-premium);
+          animation: cardIn 0.5s var(--ease-premium) both;
+        }
+        @media (hover: hover) {
+          .task-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 28px rgba(250, 204, 21, 0.14);
+            border-color: rgba(250, 204, 21, 0.4);
+          }
+          .task-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(250,204,21,0.32); }
+          .cat-pill:hover { border-color: rgba(250,204,21,0.4); }
+        }
+
         .task-btn {
           background: linear-gradient(135deg, #facc15, #eab308);
           border: none;
-          padding: 9px 0;
-          border-radius: 9px;
+          padding: 10px 0;
+          border-radius: 10px;
           font-weight: 700;
           cursor: pointer;
           margin-top: 10px;
           color: #000;
           font-size: 11px;
           box-shadow: 0 0 12px rgba(250,204,21,0.18);
-          transition: transform 0.15s ease;
+          transition: transform 0.2s var(--ease-premium), box-shadow 0.2s var(--ease-premium);
           width: 100%;
           font-family: Poppins, sans-serif;
+          -webkit-tap-highlight-color: transparent;
         }
-        .task-btn:hover { transform: translateY(-2px); }
+        .task-btn:active { transform: scale(0.96); }
+
+        .tn-focusable:focus-visible { outline: 2px solid #facc15; outline-offset: 2px; }
+
+        /* Ad banner wrapper — asli iframe hamesha 728x90 hi rehta hai
+           (ad script ki requirement), lekin poora block CSS transform se
+           screen width ke hisaab se scale down hota hai, isliye mobile pe
+           bahut lamba/wide nahi lagta aur horizontal scroll bhi nahi
+           chahiye padta. */
+        .ad-slot {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+          border-radius: 14px;
+          background: rgba(17,17,17,0.6);
+          border: 1px solid rgba(250,204,21,0.10);
+          padding: 8px 0;
+        }
       `}</style>
 
       <div
         className="relative z-0"
-        style={{ animation: "pageFadeIn 0.35s ease both" }}
+        style={{ animation: "pageFadeIn 0.4s var(--ease-premium) both" }}
       >
-        {/* faint grid texture for depth, matches the rest of the app */}
         <div className="fixed inset-0 opacity-[0.04] bg-[linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
 
-        <div className="relative z-10 flex justify-between items-center mb-4 gap-2.5">
-          <div className="min-w-0">
-            <h1 className="text-[clamp(22px,6vw,34px)] font-extrabold bg-gradient-to-r from-[#facc15] to-white bg-clip-text text-transparent m-0 mb-1 flex items-center gap-2 truncate">
-              <ClipboardList size={22} color="#facc15" className="shrink-0" />{" "}
-              Tasks
-            </h1>
-            <p className="text-[#a1a1aa] text-[11px] m-0">
-              Complete tasks and earn rewards instantly.
-            </p>
+        <div className="tn-shell relative z-10">
+          {/* ---------- Header ---------- */}
+          <div className="flex justify-between items-center mb-4 gap-2.5">
+            <div className="min-w-0">
+              <h1 className="text-[clamp(22px,3vw+12px,30px)] font-extrabold bg-gradient-to-r from-[#facc15] to-white bg-clip-text text-transparent m-0 mb-1 flex items-center gap-2 truncate">
+                <ClipboardList size={22} color="#facc15" className="shrink-0" />{" "}
+                Tasks
+              </h1>
+              <p className="text-[#a1a1aa] text-[11px] m-0">
+                Complete tasks and earn rewards instantly.
+              </p>
+            </div>
+
+            <div
+              className={`bg-[#111] border border-[#facc15]/[0.18] px-3 py-[7px] rounded-[10px] text-[#facc15] font-bold text-[11px] max-[359px]:text-[10px] max-[359px]:px-2 max-[359px]:py-[5px] flex items-center gap-[5px] shrink-0 transition-all duration-300 ${
+                coinPulse
+                  ? "scale-[1.14] shadow-[0_0_18px_rgba(250,204,21,0.45)] border-[#facc15]/60"
+                  : ""
+              }`}
+            >
+              <Coins size={13} /> {coins.toLocaleString()}
+            </div>
           </div>
 
-          <div className="bg-[#111] border border-[#facc15]/[0.18] px-3 py-[7px] rounded-[10px] text-[#facc15] font-bold text-[11px] max-[359px]:text-[10px] max-[359px]:px-2 max-[359px]:py-[5px] flex items-center gap-[5px] shrink-0">
-            <Coins size={13} /> {coins.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="relative z-10 flex gap-[8px] mb-4 overflow-x-auto cat-scroll -mx-4 px-4 sm:mx-0 sm:px-0">
-          {categories.map((c) => {
-            const CatIcon = c.icon;
-            const isActive = activeCategory === c.key;
-            return (
-              <button
-                key={c.key}
-                onClick={() => setActiveCategory(c.key)}
-                className={`shrink-0 flex items-center gap-1.5 px-[13px] h-9 rounded-full text-[11.5px] font-bold border transition-colors duration-150 ${FONT} ${
-                  isActive
-                    ? "bg-gradient-to-br from-[#facc15] to-[#eab308] text-black border-transparent"
-                    : "bg-[#111111]/[0.88] text-[#a1a1aa] border-[#facc15]/[0.14] hover:border-[#facc15]/35"
-                }`}
-              >
-                <CatIcon size={13} /> {c.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {visibleTasks.length === 0 ? (
-          <div className="relative z-10 bg-[#111111]/[0.88] border border-[#facc15]/[0.12] rounded-2xl p-8 text-center backdrop-blur-[18px]">
-            <p className="text-[#a1a1aa] text-[12px] m-0">
-              No tasks in this category right now.
-            </p>
-          </div>
-        ) : (
-          <div className="task-grid relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-[10px] sm:gap-4 max-[359px]:gap-2">
-            {visibleTasks.map((t) => {
-              const Icon = t.icon;
-              const isBest = t.key === bestRewardKey;
-              const isApps = t.key === "apps";
+          {/* ---------- Category pills ---------- */}
+          <div className="flex gap-[8px] mb-5 overflow-x-auto cat-scroll -mx-4 px-4 sm:mx-0 sm:px-0">
+            {categories.map((c) => {
+              const CatIcon = c.icon;
+              const isActive = activeCategory === c.key;
               return (
-                <div
-                  className={`relative bg-[#111111]/[0.88] border rounded-2xl p-[14px] sm:p-4 max-[359px]:p-[11px] backdrop-blur-[18px] shadow-[0_0_18px_rgba(250,204,21,0.05)] transition-all duration-[250ms] flex flex-col justify-between min-h-[165px] sm:min-h-[195px] max-[359px]:min-h-[155px] cursor-pointer animate-[cardIn_0.4s_ease_both] hover:-translate-y-1 hover:border-[#facc15]/35 ${
-                    isBest ? "border-[#facc15]/40" : "border-[#facc15]/[0.12]"
+                <button
+                  key={c.key}
+                  onClick={() => setActiveCategory(c.key)}
+                  className={`cat-pill tn-focusable shrink-0 flex items-center gap-1.5 px-[13px] h-9 rounded-full text-[11.5px] font-bold border transition-colors duration-200 ${FONT} ${
+                    isActive
+                      ? "bg-gradient-to-br from-[#facc15] to-[#eab308] text-black border-transparent"
+                      : "bg-[#111111]/[0.88] text-[#a1a1aa] border-[#facc15]/[0.14]"
                   }`}
-                  key={t.key}
                 >
-                  {isBest && (
-                    <span className="absolute -top-2 left-3 bg-gradient-to-r from-[#facc15] to-[#ff8f00] text-black text-[8.5px] font-extrabold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-[0_2px_8px_rgba(250,204,21,0.35)]">
-                      <Sparkles size={9} /> Best reward
-                    </span>
-                  )}
-
-                  <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="w-[34px] h-[34px] rounded-[10px] bg-[#facc15]/10 text-[#facc15] flex items-center justify-center shrink-0">
-                        <Icon size={17} />
-                      </div>
-                      <div className="bg-[#facc15]/10 text-[#facc15] text-[9px] font-bold px-[7px] py-1 rounded-[20px] flex items-center gap-[3px] whitespace-nowrap">
-                        <Coins size={10} /> +{t.reward}
-                      </div>
-                    </div>
-
-                    <h2 className="text-[14px] sm:text-[16px] max-[359px]:text-[12px] m-0 mb-[5px] font-bold">
-                      {t.title}
-                    </h2>
-                    <p
-                      className="text-[#a1a1aa] leading-4 sm:leading-[18px] text-[10px] sm:text-[12px] max-[359px]:text-[9px] m-0"
-                      style={clamp2Lines}
-                    >
-                      {t.desc}
-                    </p>
-
-                    {!isApps && (
-                      <div className="flex items-center gap-1 text-[#a1a1aa] text-[9px] mt-2">
-                        <Clock size={11} /> {t.time}
-                      </div>
-                    )}
-                  </div>
-
-                  {isApps ? (
-                    <button
-                      onClick={() => navigate("/offerwall")}
-                      className="task-btn"
-                    >
-                      Install App
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleTaskClick(t)}
-                      className={`bg-gradient-to-br from-[#facc15] to-[#eab308] border-none py-[9px] rounded-[9px] font-bold cursor-pointer mt-[10px] text-black text-[11px] shadow-[0_0_12px_rgba(250,204,21,0.18)] transition-transform duration-150 w-full hover:-translate-y-0.5 ${FONT}`}
-                    >
-                      {t.action}
-                    </button>
-                  )}
-                </div>
+                  <CatIcon size={13} /> {c.label}
+                </button>
               );
             })}
           </div>
-        )}
 
-        <div className="relative z-10 flex justify-center items-center mt-2 mb-2">
-          <iframe
-            title="ad-banner"
-            srcDoc={adBannerSrcDoc}
-            width="320"
-            height="50"
-            style={{ border: "none", background: "transparent" }}
-            scrolling="no"
-          />
+          {/* ---------- Task grid ---------- */}
+          {visibleTasks.length === 0 ? (
+            <div className="bg-[#111111]/[0.88] border border-[#facc15]/[0.12] rounded-2xl p-8 text-center backdrop-blur-[18px]">
+              <p className="text-[#a1a1aa] text-[12px] m-0">
+                No tasks in this category right now.
+              </p>
+            </div>
+          ) : (
+            <div className="task-grid">
+              {visibleTasks.map((t, i) => {
+                const Icon = t.icon;
+                const isBest = t.key === bestRewardKey;
+                const isApps = t.key === "apps";
+                return (
+                  <div
+                    className={`task-card tn-focusable relative bg-[#111111]/[0.88] border rounded-2xl p-[clamp(13px,1.6vw,18px)] backdrop-blur-[18px] shadow-[0_0_18px_rgba(250,204,21,0.05)] flex flex-col justify-between min-h-[168px] sm:min-h-[195px] max-[359px]:min-h-[155px] cursor-pointer ${
+                      isBest ? "border-[#facc15]/40" : "border-[#facc15]/[0.12]"
+                    }`}
+                    style={{ animationDelay: `${i * 0.06}s` }}
+                    key={t.key}
+                  >
+                    {isBest && (
+                      <span className="absolute -top-2 left-3 bg-gradient-to-r from-[#facc15] to-[#ff8f00] text-black text-[8.5px] font-extrabold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-[0_2px_8px_rgba(250,204,21,0.35)]">
+                        <Sparkles size={9} /> Best reward
+                      </span>
+                    )}
+
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="w-[34px] h-[34px] rounded-[10px] bg-[#facc15]/10 text-[#facc15] flex items-center justify-center shrink-0">
+                          <Icon size={17} />
+                        </div>
+                        <div className="bg-[#facc15]/10 text-[#facc15] text-[9px] font-bold px-[7px] py-1 rounded-[20px] flex items-center gap-[3px] whitespace-nowrap">
+                          <Coins size={10} /> +{t.reward}
+                        </div>
+                      </div>
+
+                      <h2 className="text-[14px] sm:text-[16px] max-[359px]:text-[12px] m-0 mb-[5px] font-bold">
+                        {t.title}
+                      </h2>
+                      <p
+                        className="text-[#a1a1aa] leading-4 sm:leading-[18px] text-[10px] sm:text-[12px] max-[359px]:text-[9px] m-0"
+                        style={clamp2Lines}
+                      >
+                        {t.desc}
+                      </p>
+
+                      {!isApps && (
+                        <div className="flex items-center gap-1 text-[#a1a1aa] text-[9px] mt-2">
+                          <Clock size={11} /> {t.time}
+                        </div>
+                      )}
+                    </div>
+
+                    {isApps ? (
+                      <button
+                        onClick={() => navigate("/offerwall")}
+                        className="task-btn tn-focusable"
+                      >
+                        View Task
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleTaskClick(t)}
+                        className="task-btn tn-focusable"
+                      >
+                        {t.action}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ---------- Ad banner — cards ke neeche, bottom nav se upar ---------- */}
+          <div className="mt-5 mb-2">
+            <div
+              ref={adWrapRef}
+              className="ad-slot"
+              style={{ height: AD_H * adScale }}
+            >
+              <div
+                style={{
+                  width: AD_W,
+                  height: AD_H,
+                  transform: `scale(${adScale})`,
+                  transformOrigin: "center center",
+                }}
+              >
+                <iframe
+                  title="ad-banner"
+                  srcDoc={adBannerSrcDoc}
+                  width={AD_W}
+                  height={AD_H}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    display: "block",
+                  }}
+                  scrolling="no"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
+        {/* ---------- Bottom nav ---------- */}
         <div
           className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-[420px] h-16 bg-[#111111]/90 border border-[#facc15]/[0.12] rounded-[22px] flex justify-around items-center backdrop-blur-[18px] shadow-[0_0_25px_rgba(0,0,0,0.35)]"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
@@ -434,7 +551,7 @@ function Tasks() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`no-underline text-center font-semibold text-[10px] flex flex-col items-center gap-[3px] transition-all duration-200 ${
+                className={`tn-focusable no-underline text-center font-semibold text-[10px] flex flex-col items-center gap-[3px] rounded-xl transition-all duration-300 ${
                   isActive
                     ? "text-[#facc15] -translate-y-0.5"
                     : "text-[#a1a1aa]"
@@ -447,6 +564,7 @@ function Tasks() {
           })}
         </div>
 
+        {/* ---------- Task popup ---------- */}
         {showPopup && selectedTask && (
           <div
             className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 px-4 sm:px-5"
@@ -456,20 +574,18 @@ function Tasks() {
             <div
               className={`relative bg-[#111111] border border-[#facc15]/[0.18] rounded-[22px] p-5 sm:p-7 w-full max-w-[340px] sm:max-w-sm text-center shadow-[0_0_40px_rgba(0,0,0,0.55)] ${FONT}`}
               style={{
-                animation: "popupIn 0.28s cubic-bezier(0.16,1,0.3,1) both",
+                animation: "popupIn 0.28s var(--ease-premium) both",
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* close button */}
               <button
                 onClick={() => setShowPopup(false)}
                 aria-label="Close"
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#a1a1aa] hover:text-white flex items-center justify-center transition-colors duration-150"
+                className="tn-focusable absolute top-3 right-3 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#a1a1aa] hover:text-white flex items-center justify-center transition-colors duration-150"
               >
                 <X size={16} />
               </button>
 
-              {/* icon badge */}
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#facc15]/10 border border-[#facc15]/20 text-[#facc15] flex items-center justify-center mx-auto mb-4">
                 <selectedTask.icon size={26} />
               </div>
@@ -484,14 +600,13 @@ function Tasks() {
                 guaranteed.
               </p>
 
-              {/* trust badge */}
               <div className="flex items-center justify-center gap-1.5 mt-4 mb-5 text-[10px] sm:text-[11px] text-[#4ade80] font-semibold bg-[#4ade80]/10 border border-[#4ade80]/20 rounded-full px-3 py-[6px] w-fit mx-auto">
                 <ShieldCheck size={13} /> Verified &amp; secure rewards
               </div>
 
               <button
                 onClick={() => setShowPopup(false)}
-                className={`w-full bg-gradient-to-br from-[#facc15] to-[#eab308] text-black font-bold py-3 rounded-[12px] text-[13px] shadow-[0_0_16px_rgba(250,204,21,0.2)] transition-transform duration-150 hover:-translate-y-0.5 ${FONT}`}
+                className={`tn-focusable w-full bg-gradient-to-br from-[#facc15] to-[#eab308] text-black font-bold py-3 rounded-[12px] text-[13px] shadow-[0_0_16px_rgba(250,204,21,0.2)] transition-transform duration-150 hover:-translate-y-0.5 ${FONT}`}
               >
                 Got it
               </button>
