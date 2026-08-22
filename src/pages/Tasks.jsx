@@ -40,6 +40,13 @@ function Tasks() {
   const [showCPXSuccess, setShowCPXSuccess] = useState(false);
   const [earnedCoins, setEarnedCoins] = useState(0);
 
+  // Kuch third-party logos hotlink-protected hote hain ya kabhi load fail
+  // ho sakte hain — agar image error de to us task ke liye chup-chaap
+  // wapas normal lucide icon par fallback kar do, taaki box khaali na dikhe.
+  const [logoFailed, setLogoFailed] = useState({});
+  const markLogoFailed = (key) =>
+    setLogoFailed((prev) => ({ ...prev, [key]: true }));
+
   // Ad banner ka script hardcoded 728x90 maangta hai — width/height ko
   // directly chhota karne se ad load hi nahi hota. Isliye asli size
   // fixed rakhte hain aur poore wrapper ko CSS transform:scale() se
@@ -212,7 +219,7 @@ function Tasks() {
   ];
 
   // "direct" tasks navigate straight to a route instead of opening the
-  // "coming soon" popup — same pattern as the Apps and Survey card.
+  // "coming soon" popup — same pattern as the CPAlead card.
   const tasks = [
     {
       key: "ads",
@@ -237,11 +244,11 @@ function Tasks() {
     {
       key: "apps",
       icon: Download,
-      title: "Apps and Survey",
+      title: "CPAlead",
       desc: "Install apps and earn coins.",
       reward: 80,
       time: "1 min",
-      action: "Install",
+      action: "Open",
       category: "apps",
       direct: true,
       route: "/offerwall",
@@ -249,8 +256,8 @@ function Tasks() {
     {
       key: "survey",
       icon: FileText,
-      title: "Complete Survey",
-      desc: "Complete survey, earn coin.",
+      title: "CPX Research",
+      desc: "Complete survey, earn high coin.",
       reward: 50,
       time: "3 min",
       action: "Open Survey",
@@ -267,8 +274,8 @@ function Tasks() {
     { key: "all", label: "All", icon: LayoutGrid },
     { key: "ads", label: "Ads", icon: Megaphone },
     { key: "videos", label: "Videos", icon: Video },
-    { key: "apps", label: "Apps and Survey", icon: Download },
-    { key: "survey", label: "Survey", icon: FileText },
+    { key: "apps", label: "CPAlead", icon: Download },
+    { key: "survey", label: "CPX Research", icon: FileText },
   ];
 
   const visibleTasks =
@@ -524,11 +531,25 @@ function Tasks() {
 
                     <div>
                       <div className="flex justify-between items-start mb-2">
-                        <div className="w-[34px] h-[34px] rounded-[10px] bg-[#facc15]/10 text-[#facc15] flex items-center justify-center shrink-0">
-                          <Icon size={17} />
-                        </div>
-                        <div className="bg-[#facc15]/10 text-[#facc15] text-[9px] font-bold px-[7px] py-1 rounded-[20px] flex items-center gap-[3px] whitespace-nowrap">
-                          <Coins size={10} /> +{t.reward}
+                        <div className="w-[34px] h-[34px] rounded-[10px] bg-[#facc15]/10 text-[#facc15] flex items-center justify-center shrink-0 overflow-hidden">
+                          {t.key === "apps" && !logoFailed.apps ? (
+                            <img
+                              src="https://cdndn.s3.us-west-1.amazonaws.com/logo/logo.webp"
+                              alt="CPAlead"
+                              onError={() => markLogoFailed("apps")}
+                              className="w-full h-full object-contain p-[5px] bg-white rounded-[10px]"
+                            />
+                          ) : t.key === "survey" && !logoFailed.survey ? (
+                            <img
+                              src="https://www.cpx-research.com/main/en/assets/img/logo.png"
+                              alt="CPX Research"
+                              referrerPolicy="no-referrer"
+                              onError={() => markLogoFailed("survey")}
+                              className="w-full h-full object-contain p-[5px] bg-white rounded-[10px]"
+                            />
+                          ) : (
+                            <Icon size={17} />
+                          )}
                         </div>
                       </div>
 
