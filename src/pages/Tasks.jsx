@@ -34,6 +34,12 @@ function Tasks() {
   const [showCPXSurvey, setShowCPXSurvey] = useState(false);
   const [cpxUrl, setCpxUrl] = useState("");
 
+  // CPX Research redirect ke baad ka success popup — jab user survey
+  // complete karke ?cpx_status=success&coins=XX ke saath wapas is page
+  // par redirect hota hai.
+  const [showCPXSuccess, setShowCPXSuccess] = useState(false);
+  const [earnedCoins, setEarnedCoins] = useState(0);
+
   // Ad banner ka script hardcoded 728x90 maangta hai — width/height ko
   // directly chhota karne se ad load hi nahi hota. Isliye asli size
   // fixed rakhte hain aur poore wrapper ko CSS transform:scale() se
@@ -141,6 +147,24 @@ function Tasks() {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onVisible);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // CPX Research se success redirect handle karna. Jab user survey
+  // complete karke ?cpx_status=success&coins=XX ke saath is page par
+  // wapas aata hai, to success popup dikhao aur coins turant refresh
+  // kar do (backend already postback se update kar chuka hoga).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cpxStatus = params.get("cpx_status");
+    const coinsParam = Number(params.get("coins") || 0);
+    if (cpxStatus === "success") {
+      setEarnedCoins(coinsParam);
+      setShowCPXSuccess(true);
+      loadProfile({ silent: true });
+      // URL se parameters hata do taaki refresh par dobara popup na aaye
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -641,6 +665,54 @@ function Tasks() {
                   className="w-full h-full border-0"
                 />
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ---------- CPX Success Popup ---------- */}
+        {showCPXSuccess && (
+          <div
+            className="fixed inset-0 z-[60] bg-black/75 backdrop-blur-sm flex items-center justify-center px-4 sm:px-5"
+            style={{ animation: "overlayIn 0.2s ease both" }}
+            onClick={() => setShowCPXSuccess(false)}
+          >
+            <div
+              className={`relative bg-[#111111] border border-[#facc15]/[0.18] rounded-[22px] p-5 sm:p-7 w-full max-w-[340px] sm:max-w-sm text-center shadow-[0_0_40px_rgba(0,0,0,0.55)] ${FONT}`}
+              style={{ animation: "popupIn 0.28s var(--ease-premium) both" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowCPXSuccess(false)}
+                aria-label="Close"
+                className="tn-focusable absolute top-3 right-3 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#a1a1aa] hover:text-white flex items-center justify-center transition-colors duration-150"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck size={26} />
+              </div>
+
+              <h2 className="text-[17px] sm:text-[19px] font-bold text-white m-0 mb-2">
+                Task Completed Successfully!
+              </h2>
+
+              <p className="text-[#a1a1aa] text-[12px] sm:text-[13px] leading-[19px] m-0 px-1">
+                Your survey has been completed successfully.
+              </p>
+
+              {earnedCoins > 0 && (
+                <div className="flex items-center justify-center gap-1.5 mt-4 mb-1 text-[13px] sm:text-[14px] text-[#facc15] font-bold bg-[#facc15]/10 border border-[#facc15]/20 rounded-full px-4 py-[8px] w-fit mx-auto">
+                  <Coins size={14} /> +{earnedCoins} Coins
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowCPXSuccess(false)}
+                className={`tn-focusable w-full mt-5 bg-gradient-to-br from-[#facc15] to-[#eab308] text-black font-bold py-3 rounded-[12px] text-[13px] shadow-[0_0_16px_rgba(250,204,21,0.2)] transition-transform duration-150 hover:-translate-y-0.5 ${FONT}`}
+              >
+                OK
+              </button>
             </div>
           </div>
         )}
