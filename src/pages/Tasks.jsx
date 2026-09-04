@@ -197,7 +197,7 @@ function Tasks() {
       }
       const url =
         `https://offers.cpx-research.com/index.php` +
-        `?app_id=35548` +
+        `?app_id=35896` +
         `&ext_user_id=${encodeURIComponent(uniqueUserId)}` +
         `&username=${encodeURIComponent(user.username || "")}` +
         `&email=${encodeURIComponent(user.email || "")}` +
