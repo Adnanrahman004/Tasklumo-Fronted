@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getProfile } from "../services/authServices";
 import {
   User,
@@ -16,6 +16,7 @@ import {
   Sparkles,
   LayoutGrid,
   FileText,
+  Search,
 } from "lucide-react";
 
 function Tasks() {
@@ -29,30 +30,20 @@ function Tasks() {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [pageLoading, setPageLoading] = useState(true);
   const [showCPXSurvey, setShowCPXSurvey] = useState(false);
   const [cpxUrl, setCpxUrl] = useState("");
 
-  // CPX Research redirect ke baad ka success popup — jab user survey
-  // complete karke ?cpx_status=success&coins=XX ke saath wapas is page
-  // par redirect hota hai.
   const [showCPXSuccess, setShowCPXSuccess] = useState(false);
   const [earnedCoins, setEarnedCoins] = useState(0);
 
-  // Kuch third-party logos hotlink-protected hote hain ya kabhi load fail
-  // ho sakte hain — agar image error de to us task ke liye chup-chaap
-  // wapas normal lucide icon par fallback kar do, taaki box khaali na dikhe.
   const [logoFailed, setLogoFailed] = useState({});
   const markLogoFailed = (key) =>
     setLogoFailed((prev) => ({ ...prev, [key]: true }));
 
-  // Ad banner ka script hardcoded 728x90 maangta hai — width/height ko
-  // directly chhota karne se ad load hi nahi hota. Isliye asli size
-  // fixed rakhte hain aur poore wrapper ko CSS transform:scale() se
-  // container ki available width ke hisaab se sikoड़te hain. Iframe ke
-  // baad wrapper ki height bhi scale ke hisaab se adjust hoti hai taaki
-  // scale hone ke baad neeche khaali jagah na bache.
+  // Ad Banner Ref & Scale (for responsiveness)
   const adWrapRef = useRef(null);
   const [adScale, setAdScale] = useState(1);
   const AD_W = 728;
@@ -70,38 +61,18 @@ function Tasks() {
     return () => window.removeEventListener("resize", computeScale);
   }, []);
 
-  // 728x90 leaderboard ad. srcDoc me isolated iframe document use kar rahe
-  // hain kyunki yeh network document.write use karta hai jo React-rendered
-  // page me directly daalne par silently fail ho jaata hai. Iframe ke
-  // andar hi width/height fixed 728x90 di gayi hai — yeh script ka apna
-  // requirement hai, ise chhote na karo warna ad load hi nahi hoga.
+  // SINGLE AD BANNER SCRIPT
   const adBannerSrcDoc = `
     <!DOCTYPE html>
     <html>
       <head>
         <style>
-          html, body {
-            margin: 0;
-            padding: 0;
-            width: 728px;
-            height: 90px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: transparent;
-            overflow: hidden;
-          }
+          html, body { margin: 0; padding: 0; width: 728px; height: 90px; display: flex; justify-content: center; align-items: center; background: transparent; overflow: hidden; }
         </style>
       </head>
       <body>
         <script type="text/javascript">
-          atOptions = {
-            'key' : '1daf843f1ff89f87c1aa7e1eb0a173a3',
-            'format' : 'iframe',
-            'height' : 90,
-            'width' : 728,
-            'params' : {}
-          };
+          atOptions = { 'key' : '1daf843f1ff89f87c1aa7e1eb0a173a3', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };
         </script>
         <script type="text/javascript" src="https://www.highperformanceformat.com/1daf843f1ff89f87c1aa7e1eb0a173a3/invoke.js"></script>
       </body>
@@ -109,38 +80,38 @@ function Tasks() {
   `;
 
   useEffect(() => {
-    const timer = setTimeout(() => setPageLoading(false), 500);
+    const timer = setTimeout(() => setPageLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
-  const pulseCoins = () => {
+  const pulseCoins = useCallback(() => {
     setCoinPulse(true);
     setTimeout(() => setCoinPulse(false), 500);
-  };
+  }, []);
 
-  const loadProfile = async ({ silent = false } = {}) => {
-    try {
-      const data = await getProfile();
-      setCoins((prev) => {
-        const next = data.user.coins || 0;
-        if (next !== prev) pulseCoins();
-        return next;
-      });
-    } catch (err) {
-      console.error("Failed to refresh profile from backend:", err);
-    }
-  };
+  const loadProfile = useCallback(
+    async ({ silent = false } = {}) => {
+      try {
+        const data = await getProfile();
+        setCoins((prev) => {
+          const next = data.user.coins || 0;
+          if (next !== prev) pulseCoins();
+          return next;
+        });
+      } catch (err) {
+        console.error("Failed to refresh profile from backend:", err);
+      }
+    },
+    [pulseCoins],
+  );
 
-  // 1) Page load hote hi backend se fetch
   useEffect(() => {
     loadProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadProfile]);
 
   useEffect(() => {
     loadProfile({ silent: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, [location.pathname, loadProfile]);
 
   useEffect(() => {
     const onVisible = () => {
@@ -154,13 +125,8 @@ function Tasks() {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onVisible);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadProfile]);
 
-  // CPX Research se success redirect handle karna. Jab user survey
-  // complete karke ?cpx_status=success&coins=XX ke saath is page par
-  // wapas aata hai, to success popup dikhao aur coins turant refresh
-  // kar do (backend already postback se update kar chuka hoga).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cpxStatus = params.get("cpx_status");
@@ -169,27 +135,19 @@ function Tasks() {
       setEarnedCoins(coinsParam);
       setShowCPXSuccess(true);
       loadProfile({ silent: true });
-      // URL se parameters hata do taaki refresh par dobara popup na aaye
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadProfile]);
 
   const handleTaskClick = (task) => {
     setSelectedTask(task);
     setShowPopup(true);
   };
 
-  // secure_hash abhi intentionally frontend me nahi daala hai — CPX Research
-  // ke docs ke hisaab se yeh MD5(ext_user_id + secret_key) hota hai, aur
-  // secret_key sirf backend par hi rehna chahiye. Jab backend endpoint ready
-  // ho jaye jo signed URL (ya sirf secure_hash) return kare, tab yahan use
-  // wire karna hoga.
   const openCPXSurvey = async () => {
     try {
       const data = await getProfile();
       const user = data.user;
-      // Tumhare backend user ka unique ID
       const uniqueUserId = user.userId || user.uid || user.id || user._id;
       if (!uniqueUserId) {
         alert("User ID nahi mila. Please login again.");
@@ -218,8 +176,6 @@ function Tasks() {
     { to: "/profile", icon: User, label: "Profile" },
   ];
 
-  // "direct" tasks navigate straight to a route instead of opening the
-  // "coming soon" popup — same pattern as the CPAlead card.
   const tasks = [
     {
       key: "ads",
@@ -278,10 +234,14 @@ function Tasks() {
     { key: "survey", label: "CPX Research", icon: FileText },
   ];
 
-  const visibleTasks =
-    activeCategory === "all"
-      ? tasks
-      : tasks.filter((t) => t.category === activeCategory);
+  const visibleTasks = tasks.filter((t) => {
+    const matchCategory =
+      activeCategory === "all" || t.category === activeCategory;
+    const matchSearch =
+      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCategory && matchSearch;
+  });
 
   const clamp2Lines = {
     display: "-webkit-box",
@@ -290,12 +250,10 @@ function Tasks() {
     overflow: "hidden",
   };
 
-  // ---------- Premium loader (identical pattern across the whole app) ----------
   if (pageLoading) {
     return (
       <div
-        className={`min-h-screen min-h-[100dvh] flex flex-col items-center justify-center text-white ${FONT}
-        bg-[radial-gradient(circle_at_bottom_left,rgba(255,120,40,0.35),transparent_35%),radial-gradient(circle_at_top_right,rgba(255,140,0,0.22),transparent_28%),linear-gradient(135deg,#050505_0%,#0a0a0a_40%,#120909_100%)]`}
+        className={`min-h-[100dvh] flex flex-col items-center justify-center text-[#111827] ${FONT} bg-[#F2F5F3]`}
       >
         <style>{`
           @keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -304,41 +262,35 @@ function Tasks() {
           @keyframes floatCoin { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(180deg); } }
           @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
           @keyframes dotBounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
-          @media (prefers-reduced-motion: reduce) {
-            * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
-          }
+          @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; } }
         `}</style>
-
-        <div className="fixed inset-0 opacity-[0.04] bg-[linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
 
         <div className="relative w-[110px] h-[110px] flex items-center justify-center mb-6">
           <div
-            className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(250,204,21,0.35),transparent_70%)] blur-[6px]"
+            className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(34,197,94,0.3),transparent_70%)] blur-[6px]"
             style={{ animation: "pulseGlow 1.6s ease-in-out infinite" }}
           />
           <div
-            className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#facc15] border-r-[#facc15]/40"
+            className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-[#22c55e] border-r-[#22c55e]/40"
             style={{ animation: "spinRing 1.1s linear infinite" }}
           />
           <div
-            className="absolute inset-[14px] rounded-full border-[3px] border-transparent border-b-[#ff9d3d] border-l-[#ff9d3d]/40"
+            className="absolute inset-[14px] rounded-full border-[3px] border-transparent border-b-[#16a34a] border-l-[#16a34a]/40"
             style={{ animation: "spinRingReverse 1.4s linear infinite" }}
           />
           <div
-            className="relative w-11 h-11 rounded-full bg-gradient-to-br from-[#facc15] to-[#ffb300] text-black flex items-center justify-center shadow-[0_0_18px_rgba(250,204,21,0.5)]"
+            className="relative w-11 h-11 rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white flex items-center justify-center shadow-[0_0_18px_rgba(34,197,94,0.45)]"
             style={{ animation: "floatCoin 1.6s ease-in-out infinite" }}
           >
             <Coins size={20} />
           </div>
         </div>
-
         <p
-          className="text-[15px] font-extrabold bg-gradient-to-r from-[#facc15] to-white bg-clip-text text-transparent m-0 mb-2 tracking-wide"
+          className="text-[15px] font-extrabold bg-gradient-to-r from-[#16a34a] to-[#111827] bg-clip-text text-transparent m-0 mb-2 tracking-wide"
           style={{ animation: "fadeInUp 0.4s ease both" }}
         >
           Loading your tasks
         </p>
-
         <div
           className="flex gap-1.5"
           style={{ animation: "fadeInUp 0.4s ease 0.1s both" }}
@@ -346,7 +298,7 @@ function Tasks() {
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className="w-[6px] h-[6px] rounded-full bg-[#facc15]"
+              className="w-[6px] h-[6px] rounded-full bg-[#22c55e]"
               style={{
                 animation: "dotBounce 1.2s ease-in-out infinite",
                 animationDelay: `${i * 0.15}s`,
@@ -359,15 +311,21 @@ function Tasks() {
   }
 
   return (
-    <div
-      className={`min-h-screen min-h-[100dvh] text-white ${FONT}
-      bg-[radial-gradient(circle_at_bottom_left,rgba(255,120,40,0.35),transparent_35%),radial-gradient(circle_at_top_right,rgba(255,140,0,0.22),transparent_28%),linear-gradient(135deg,#050505_0%,#0a0a0a_40%,#120909_100%)]`}
-    >
-      {/* Shared responsive tokens — same system as Home.jsx so the whole
-          app scales identically between phone and laptop instead of
-          feeling like two different products. */}
+    <div className={`min-h-[100dvh] text-[#111827] ${FONT} bg-[#F2F5F3]`}>
       <style>{`
-        :root { --ease-premium: cubic-bezier(0.16, 1, 0.3, 1); }
+        :root {
+          --brand: #16a34a;
+          --brand-soft: #22c55e;
+          --highlight: #dcfce7;
+          --border: #e5e7eb;
+          --muted: #6b7280;
+          --ink: #111827;
+          --gold: #d97706;
+          --gold-soft: #f59e0b;
+          --gold-bg: #fef3c7;
+          --gold-border: #fcd34d;
+          --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+        }
         @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popupIn { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -379,23 +337,37 @@ function Tasks() {
         .tn-shell {
           max-width: 1180px;
           margin: 0 auto;
-          padding: clamp(16px, 3vw, 32px) clamp(16px, 4vw, 40px) clamp(110px, 13vh, 130px);
-          padding-top: max(clamp(16px, 3vw, 32px), env(safe-area-inset-top));
+          padding-left: clamp(16px, 4vw, 40px);
+          padding-right: clamp(16px, 4vw, 40px);
+          padding-bottom: clamp(100px, 14vh, 120px);
+          padding-top: 0;
         }
+        
+        .tn-header {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          background: rgba(242, 245, 243, 0.94);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border-bottom: 1px solid var(--border);
+          padding-top: max(clamp(10px, 1.4vw, 16px), env(safe-area-inset-top));
+          padding-bottom: clamp(10px, 1.4vw, 14px);
+          margin-left: calc(clamp(16px, 4vw, 40px) * -1);
+          margin-right: calc(clamp(16px, 4vw, 40px) * -1);
+          margin-bottom: 14px;
+          padding-left: clamp(16px, 4vw, 40px);
+          padding-right: clamp(16px, 4vw, 40px);
+        }
+
         .task-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: clamp(10px, 1.6vw, 16px);
         }
-        @media (min-width: 640px) {
-          .task-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (min-width: 1024px) {
-          .task-grid { grid-template-columns: repeat(4, 1fr); }
-        }
-        @media (max-width: 340px) {
-          .task-grid { grid-template-columns: 1fr; }
-        }
+        @media (min-width: 640px) { .task-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { .task-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 340px) { .task-grid { grid-template-columns: 1fr; } }
 
         .cat-scroll::-webkit-scrollbar { display: none; }
 
@@ -406,24 +378,25 @@ function Tasks() {
         @media (hover: hover) {
           .task-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 28px rgba(250, 204, 21, 0.14);
-            border-color: rgba(250, 204, 21, 0.4);
+            box-shadow: 0 10px 28px rgba(34, 197, 94, 0.16);
+            border-color: rgba(34, 197, 94, 0.45);
           }
-          .task-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(250,204,21,0.32); }
-          .cat-pill:hover { border-color: rgba(250,204,21,0.4); }
+          .task-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.32); }
+          .cat-pill:hover { border-color: rgba(34, 197, 94, 0.4); }
         }
 
+        /* Responsive Compact Button for Mobile */
         .task-btn {
-          background: linear-gradient(135deg, #facc15, #eab308);
+          background: linear-gradient(135deg, #22c55e, #16a34a);
           border: none;
-          padding: 10px 0;
-          border-radius: 10px;
+          padding: clamp(6px, 1.2vw, 10px) 0;
+          border-radius: 99px;
           font-weight: 700;
           cursor: pointer;
-          margin-top: 10px;
-          color: #000;
-          font-size: 11px;
-          box-shadow: 0 0 12px rgba(250,204,21,0.18);
+          margin-top: clamp(6px, 1vw, 12px);
+          color: #fff;
+          font-size: clamp(9.5px, 0.3vw + 9px, 12px);
+          box-shadow: 0 0 12px rgba(34, 197, 94, 0.22);
           transition: transform 0.2s var(--ease-premium), box-shadow 0.2s var(--ease-premium);
           width: 100%;
           font-family: Poppins, sans-serif;
@@ -431,58 +404,81 @@ function Tasks() {
         }
         .task-btn:active { transform: scale(0.96); }
 
-        .tn-focusable:focus-visible { outline: 2px solid #facc15; outline-offset: 2px; }
-
-        /* Ad banner wrapper — asli iframe hamesha 728x90 hi rehta hai
-           (ad script ki requirement), lekin poora block CSS transform se
-           screen width ke hisaab se scale down hota hai, isliye mobile pe
-           bahut lamba/wide nahi lagta aur horizontal scroll bhi nahi
-           chahiye padta. */
+        .tn-focusable:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+        
         .ad-slot {
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          overflow: hidden;
-          border-radius: 14px;
-          background: rgba(17,17,17,0.6);
-          border: 1px solid rgba(250,204,21,0.10);
-          padding: 8px 0;
+          width: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden;
+          border-radius: 14px; background: #fff; border: 1px solid var(--border); padding: 8px 0;
         }
+
+        .tn-coin-gold {
+          color: var(--gold);
+          background: linear-gradient(180deg, #fffbeb 0%, var(--gold-bg) 100%);
+          border-color: var(--gold-border) !important;
+        }
+        .tn-coin-gold svg { color: var(--gold); }
+        .tn-coin-gold-pulse {
+          box-shadow: 0 0 16px rgba(217, 119, 6, 0.35) !important;
+          border-color: var(--gold-soft) !important;
+        }
+        
+        .tn-chip { font-size: clamp(10px, 0.3vw + 9px, 11.5px); }
+        .tn-icon-badge { width: clamp(34px, 3vw, 40px); height: clamp(34px, 3vw, 40px); }
       `}</style>
 
+      {/* Main Content Area (Animated) */}
       <div
         className="relative z-0"
         style={{ animation: "pageFadeIn 0.4s var(--ease-premium) both" }}
       >
-        <div className="fixed inset-0 opacity-[0.04] bg-[linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
-
         <div className="tn-shell relative z-10">
-          {/* ---------- Header ---------- */}
-          <div className="flex justify-between items-center mb-4 gap-2.5">
+          {/* Header with Fixed Golden Coin Box */}
+          <div className="tn-header flex justify-between items-center gap-2.5">
             <div className="min-w-0">
-              <h1 className="text-[clamp(22px,3vw+12px,30px)] font-extrabold bg-gradient-to-r from-[#facc15] to-white bg-clip-text text-transparent m-0 mb-1 flex items-center gap-2 truncate">
-                <ClipboardList size={22} color="#facc15" className="shrink-0" />{" "}
+              <h1 className="text-[clamp(20px,1.2vw+16px,28px)] font-extrabold bg-gradient-to-r from-[#16a34a] to-[#111827] bg-clip-text text-transparent m-0 mb-1 flex items-center gap-2 truncate">
+                <ClipboardList size={22} className="text-[#16a34a] shrink-0" />{" "}
                 Tasks
               </h1>
-              <p className="text-[#a1a1aa] text-[11px] m-0">
+              <p className="text-[#6b7280] text-[clamp(10px,0.3vw+8px,12px)] m-0 truncate">
                 Complete tasks and earn rewards instantly.
               </p>
             </div>
 
+            {/* Golden Coin Box - Clean & Responsive */}
             <div
-              className={`bg-[#111] border border-[#facc15]/[0.18] px-3 py-[7px] rounded-[10px] text-[#facc15] font-bold text-[11px] max-[359px]:text-[10px] max-[359px]:px-2 max-[359px]:py-[5px] flex items-center gap-[5px] shrink-0 transition-all duration-300 ${
-                coinPulse
-                  ? "scale-[1.14] shadow-[0_0_18px_rgba(250,204,21,0.45)] border-[#facc15]/60"
-                  : ""
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl font-bold transition-all duration-300 shrink-0 ${
+                coinPulse ? "scale-105 shadow-md" : ""
               }`}
+              style={{
+                background: "linear-gradient(180deg, #FFFBEB 0%, #FEF3C7 100%)",
+                border: "1px solid #FCD34D",
+                color: "#D97706",
+              }}
             >
-              <Coins size={13} /> {coins.toLocaleString()}
+              <Coins size={14} className="shrink-0" />
+              <span className="text-[clamp(11px,3vw,13px)]">
+                {coins.toLocaleString()}
+              </span>
             </div>
           </div>
 
-          {/* ---------- Category pills ---------- */}
-          <div className="flex gap-[8px] mb-5 overflow-x-auto cat-scroll -mx-4 px-4 sm:mx-0 sm:px-0">
+          {/* Search Bar */}
+          <div className="relative mb-4">
+            <Search
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af]"
+            />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-[#e5e7eb] text-[#111827] rounded-xl py-2 pl-10 pr-4 text-[12px] sm:text-[14px] outline-none focus:border-[#22c55e] transition-colors shadow-sm"
+            />
+          </div>
+
+          {/* Category Pills */}
+          <div className="flex gap-2 mb-5 overflow-x-auto cat-scroll -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
             {categories.map((c) => {
               const CatIcon = c.icon;
               const isActive = activeCategory === c.key;
@@ -490,10 +486,10 @@ function Tasks() {
                 <button
                   key={c.key}
                   onClick={() => setActiveCategory(c.key)}
-                  className={`cat-pill tn-focusable shrink-0 flex items-center gap-1.5 px-[13px] h-9 rounded-full text-[11.5px] font-bold border transition-colors duration-200 ${FONT} ${
+                  className={`cat-pill tn-focusable shrink-0 flex items-center gap-1.5 px-3.5 h-8 rounded-full text-[11px] sm:text-[12px] font-bold border transition-colors duration-200 ${FONT} ${
                     isActive
-                      ? "bg-gradient-to-br from-[#facc15] to-[#eab308] text-black border-transparent"
-                      : "bg-[#111111]/[0.88] text-[#a1a1aa] border-[#facc15]/[0.14]"
+                      ? "bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white border-transparent shadow-sm"
+                      : "bg-white text-[#6b7280] border-[#e5e7eb]"
                   }`}
                 >
                   <CatIcon size={13} /> {c.label}
@@ -502,11 +498,15 @@ function Tasks() {
             })}
           </div>
 
-          {/* ---------- Task grid ---------- */}
+          {/* Task Grid */}
           {visibleTasks.length === 0 ? (
-            <div className="bg-[#111111]/[0.88] border border-[#facc15]/[0.12] rounded-2xl p-8 text-center backdrop-blur-[18px]">
-              <p className="text-[#a1a1aa] text-[12px] m-0">
-                No tasks in this category right now.
+            <div className="bg-white border border-[#e5e7eb] rounded-2xl p-10 text-center shadow-sm">
+              <Search size={32} className="mx-auto text-[#9ca3af] mb-3" />
+              <h3 className="text-[#111827] font-bold text-[15px] m-0 mb-1">
+                No tasks found
+              </h3>
+              <p className="text-[#6b7280] text-[13px] m-0">
+                Try a different category or search term.
               </p>
             </div>
           ) : (
@@ -517,27 +517,27 @@ function Tasks() {
                 const isDirect = !!t.direct;
                 return (
                   <div
-                    className={`task-card tn-focusable relative bg-[#111111]/[0.88] border rounded-2xl p-[clamp(13px,1.6vw,18px)] backdrop-blur-[18px] shadow-[0_0_18px_rgba(250,204,21,0.05)] flex flex-col justify-between min-h-[168px] sm:min-h-[195px] max-[359px]:min-h-[155px] cursor-pointer ${
-                      isBest ? "border-[#facc15]/40" : "border-[#facc15]/[0.12]"
+                    className={`task-card tn-focusable relative bg-white border rounded-2xl p-[clamp(10px,1.5vw,16px)] shadow-[0_1px_3px_rgba(17,24,39,0.04)] flex flex-col justify-between min-h-[clamp(130px,15vw,160px)] cursor-pointer ${
+                      isBest ? "border-[#86efac]" : "border-[#e5e7eb]"
                     }`}
                     style={{ animationDelay: `${i * 0.06}s` }}
                     key={t.key}
                   >
                     {isBest && (
-                      <span className="absolute -top-2 left-3 bg-gradient-to-r from-[#facc15] to-[#ff8f00] text-black text-[8.5px] font-extrabold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-[0_2px_8px_rgba(250,204,21,0.35)]">
-                        <Sparkles size={9} /> Best reward
+                      <span className="absolute -top-2 left-3 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-white text-[8px] uppercase tracking-wider font-bold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-sm">
+                        <Sparkles size={9} /> Top
                       </span>
                     )}
 
                     <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="w-[34px] h-[34px] rounded-[10px] bg-[#facc15]/10 text-[#facc15] flex items-center justify-center shrink-0 overflow-hidden">
+                      <div className="flex justify-between items-start mb-1.5">
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] bg-[#dcfce7] text-[#16a34a] flex items-center justify-center shrink-0 overflow-hidden">
                           {t.key === "apps" && !logoFailed.apps ? (
                             <img
                               src="https://cdndn.s3.us-west-1.amazonaws.com/logo/logo.webp"
                               alt="CPAlead"
                               onError={() => markLogoFailed("apps")}
-                              className="w-full h-full object-contain p-[5px] bg-white rounded-[10px]"
+                              className="w-full h-full object-contain p-[4px] bg-white rounded-[10px]"
                             />
                           ) : t.key === "survey" && !logoFailed.survey ? (
                             <img
@@ -545,27 +545,27 @@ function Tasks() {
                               alt="CPX Research"
                               referrerPolicy="no-referrer"
                               onError={() => markLogoFailed("survey")}
-                              className="w-full h-full object-contain p-[5px] bg-white rounded-[10px]"
+                              className="w-full h-full object-contain p-[4px] bg-white rounded-[10px]"
                             />
                           ) : (
-                            <Icon size={17} />
+                            <Icon size={15} />
                           )}
                         </div>
                       </div>
 
-                      <h2 className="text-[14px] sm:text-[16px] max-[359px]:text-[12px] m-0 mb-[5px] font-bold">
+                      <h2 className="text-[13px] sm:text-[14px] m-0 mb-1 font-bold text-[#111827] leading-tight">
                         {t.title}
                       </h2>
                       <p
-                        className="text-[#a1a1aa] leading-4 sm:leading-[18px] text-[10px] sm:text-[12px] max-[359px]:text-[9px] m-0"
+                        className="text-[#6b7280] text-[10px] sm:text-[11px] leading-[1.4] m-0"
                         style={clamp2Lines}
                       >
                         {t.desc}
                       </p>
 
                       {!isDirect && (
-                        <div className="flex items-center gap-1 text-[#a1a1aa] text-[9px] mt-2">
-                          <Clock size={11} /> {t.time}
+                        <div className="flex items-center gap-1 text-[#9ca3af] text-[9px] sm:text-[10px] mt-1.5 font-medium">
+                          <Clock size={10} /> {t.time}
                         </div>
                       )}
                     </div>
@@ -598,8 +598,8 @@ function Tasks() {
             </div>
           )}
 
-          {/* ---------- Ad banner — cards ke neeche, bottom nav se upar ---------- */}
-          <div className="mt-5 mb-2">
+          {/* Ad Banner - SINGLE & FIXED */}
+          <div className="mt-6 mb-2">
             <div
               ref={adWrapRef}
               className="ad-slot"
@@ -629,165 +629,146 @@ function Tasks() {
             </div>
           </div>
         </div>
-
-        {/* ---------- Bottom nav ---------- */}
-        <div
-          className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-[420px] h-16 bg-[#111111]/90 border border-[#facc15]/[0.12] rounded-[22px] flex justify-around items-center backdrop-blur-[18px] shadow-[0_0_25px_rgba(0,0,0,0.35)]"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`tn-focusable no-underline text-center font-semibold text-[10px] flex flex-col items-center gap-[3px] rounded-xl transition-all duration-300 ${
-                  isActive
-                    ? "text-[#facc15] -translate-y-0.5"
-                    : "text-[#a1a1aa]"
-                }`}
-              >
-                <Icon size={18} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* ---------- CPX Research Survey (full-screen) ---------- */}
-        {showCPXSurvey && cpxUrl && (
-          <div className="fixed inset-0 z-50 bg-black">
-            <div className="h-full w-full flex flex-col">
-              {/* Header */}
-              <div
-                className="h-14 shrink-0 flex items-center justify-between px-4 bg-[#111] border-b border-[#facc15]/20"
-                style={{ paddingTop: "env(safe-area-inset-top)" }}
-              >
-                <h2 className={`text-white font-bold text-sm ${FONT}`}>
-                  Complete Survey
-                </h2>
-                <button
-                  onClick={() => setShowCPXSurvey(false)}
-                  aria-label="Close survey"
-                  className="tn-focusable w-9 h-9 rounded-full bg-white/10 hover:bg-white/[0.18] text-white flex items-center justify-center transition-colors duration-150"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              {/* CPX Research */}
-              <div className="flex-1 bg-white overflow-hidden">
-                <iframe
-                  width="100%"
-                  height="2000px"
-                  frameBorder="0"
-                  src={cpxUrl}
-                  title="CPX Research Survey"
-                  className="w-full h-full border-0"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ---------- CPX Success Popup ---------- */}
-        {showCPXSuccess && (
-          <div
-            className="fixed inset-0 z-[60] bg-black/75 backdrop-blur-sm flex items-center justify-center px-4 sm:px-5"
-            style={{ animation: "overlayIn 0.2s ease both" }}
-            onClick={() => setShowCPXSuccess(false)}
-          >
-            <div
-              className={`relative bg-[#111111] border border-[#facc15]/[0.18] rounded-[22px] p-5 sm:p-7 w-full max-w-[340px] sm:max-w-sm text-center shadow-[0_0_40px_rgba(0,0,0,0.55)] ${FONT}`}
-              style={{ animation: "popupIn 0.28s var(--ease-premium) both" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setShowCPXSuccess(false)}
-                aria-label="Close"
-                className="tn-focusable absolute top-3 right-3 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#a1a1aa] hover:text-white flex items-center justify-center transition-colors duration-150"
-              >
-                <X size={16} />
-              </button>
-
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center mx-auto mb-4">
-                <ShieldCheck size={26} />
-              </div>
-
-              <h2 className="text-[17px] sm:text-[19px] font-bold text-white m-0 mb-2">
-                Task Completed Successfully!
-              </h2>
-
-              <p className="text-[#a1a1aa] text-[12px] sm:text-[13px] leading-[19px] m-0 px-1">
-                Your survey has been completed successfully.
-              </p>
-
-              {earnedCoins > 0 && (
-                <div className="flex items-center justify-center gap-1.5 mt-4 mb-1 text-[13px] sm:text-[14px] text-[#facc15] font-bold bg-[#facc15]/10 border border-[#facc15]/20 rounded-full px-4 py-[8px] w-fit mx-auto">
-                  <Coins size={14} /> +{earnedCoins} Coins
-                </div>
-              )}
-
-              <button
-                onClick={() => setShowCPXSuccess(false)}
-                className={`tn-focusable w-full mt-5 bg-gradient-to-br from-[#facc15] to-[#eab308] text-black font-bold py-3 rounded-[12px] text-[13px] shadow-[0_0_16px_rgba(250,204,21,0.2)] transition-transform duration-150 hover:-translate-y-0.5 ${FONT}`}
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ---------- Task popup ---------- */}
-        {showPopup && selectedTask && (
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 px-4 sm:px-5"
-            style={{ animation: "overlayIn 0.2s ease both" }}
-            onClick={() => setShowPopup(false)}
-          >
-            <div
-              className={`relative bg-[#111111] border border-[#facc15]/[0.18] rounded-[22px] p-5 sm:p-7 w-full max-w-[340px] sm:max-w-sm text-center shadow-[0_0_40px_rgba(0,0,0,0.55)] ${FONT}`}
-              style={{
-                animation: "popupIn 0.28s var(--ease-premium) both",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setShowPopup(false)}
-                aria-label="Close"
-                className="tn-focusable absolute top-3 right-3 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#a1a1aa] hover:text-white flex items-center justify-center transition-colors duration-150"
-              >
-                <X size={16} />
-              </button>
-
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#facc15]/10 border border-[#facc15]/20 text-[#facc15] flex items-center justify-center mx-auto mb-4">
-                <selectedTask.icon size={26} />
-              </div>
-
-              <h2 className="text-[17px] sm:text-[19px] font-bold text-white m-0 mb-2">
-                {selectedTask.title} — Coming Soon
-              </h2>
-
-              <p className="text-[#a1a1aa] text-[12px] sm:text-[13px] leading-[19px] m-0 px-1">
-                This task type isn't live yet. We're onboarding verified,
-                trusted partners so every reward you earn here is safe and
-                guaranteed.
-              </p>
-
-              <div className="flex items-center justify-center gap-1.5 mt-4 mb-5 text-[10px] sm:text-[11px] text-[#4ade80] font-semibold bg-[#4ade80]/10 border border-[#4ade80]/20 rounded-full px-3 py-[6px] w-fit mx-auto">
-                <ShieldCheck size={13} /> Verified &amp; secure rewards
-              </div>
-
-              <button
-                onClick={() => setShowPopup(false)}
-                className={`tn-focusable w-full bg-gradient-to-br from-[#facc15] to-[#eab308] text-black font-bold py-3 rounded-[12px] text-[13px] shadow-[0_0_16px_rgba(250,204,21,0.2)] transition-transform duration-150 hover:-translate-y-0.5 ${FONT}`}
-              >
-                Got it
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Bottom Nav (Fixed & Unaffected by Scroll) */}
+      <div
+        className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-[420px] bg-white/95 border border-[#e5e7eb] rounded-[22px] flex justify-around items-center shadow-[0_4px_20px_rgba(17,24,39,0.08)] h-[62px]"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.to;
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`tn-focusable no-underline text-center font-semibold text-[10px] flex flex-col items-center justify-center gap-[3px] min-w-[48px] h-full rounded-xl transition-all duration-300 ${
+                isActive ? "text-[#16a34a] -translate-y-0.5" : "text-[#6b7280]"
+              }`}
+            >
+              <Icon size={18} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Popups & Modals */}
+      {showCPXSurvey && cpxUrl && (
+        <div className="fixed inset-0 z-50 bg-white">
+          <div className="h-full w-full flex flex-col">
+            <div
+              className="h-14 shrink-0 flex items-center justify-between px-4 bg-white border-b border-[#e5e7eb]"
+              style={{ paddingTop: "env(safe-area-inset-top)" }}
+            >
+              <h2 className={`text-[#111827] font-bold text-sm ${FONT}`}>
+                Complete Survey
+              </h2>
+              <button
+                onClick={() => setShowCPXSurvey(false)}
+                aria-label="Close survey"
+                className="tn-focusable w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-[#111827] flex items-center justify-center transition-colors duration-150"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 bg-white overflow-hidden">
+              <iframe
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                src={cpxUrl}
+                title="CPX Research Survey"
+                className="w-full h-full border-0"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCPXSuccess && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center px-4 sm:px-5"
+          style={{ animation: "overlayIn 0.2s ease both" }}
+          onClick={() => setShowCPXSuccess(false)}
+        >
+          <div
+            className={`relative bg-white border border-[#e5e7eb] rounded-3xl p-5 sm:p-7 w-full max-w-[340px] sm:max-w-sm text-center shadow-xl ${FONT}`}
+            style={{ animation: "popupIn 0.28s var(--ease-premium) both" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowCPXSuccess(false)}
+              aria-label="Close"
+              className="tn-focusable absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-[#6b7280] flex items-center justify-center transition-colors duration-150"
+            >
+              <X size={16} />
+            </button>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#dcfce7] text-[#16a34a] flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck size={26} />
+            </div>
+            <h2 className="text-[17px] sm:text-[19px] font-bold text-[#111827] m-0 mb-2">
+              Task Completed!
+            </h2>
+            <p className="text-[#6b7280] text-[12px] sm:text-[13px] leading-[19px] m-0 px-1">
+              Your survey has been completed successfully.
+            </p>
+            {earnedCoins > 0 && (
+              <div className="flex items-center justify-center gap-1.5 mt-4 mb-1 text-[13px] sm:text-[14px] text-[#d97706] font-bold bg-[#fef3c7] border border-[#fcd34d] rounded-full px-4 py-[8px] w-fit mx-auto">
+                <Coins size={14} /> +{earnedCoins} Coins
+              </div>
+            )}
+            <button
+              onClick={() => setShowCPXSuccess(false)}
+              className={`tn-focusable w-full mt-5 bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white font-bold py-3 rounded-xl text-[13px] shadow-[0_4px_14px_rgba(34,197,94,0.3)] transition-transform duration-150 hover:-translate-y-0.5 ${FONT}`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showPopup && selectedTask && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 sm:px-5"
+          style={{ animation: "overlayIn 0.2s ease both" }}
+          onClick={() => setShowPopup(false)}
+        >
+          <div
+            className={`relative bg-white border border-[#e5e7eb] rounded-3xl p-5 sm:p-7 w-full max-w-[340px] sm:max-w-sm text-center shadow-xl ${FONT}`}
+            style={{ animation: "popupIn 0.28s var(--ease-premium) both" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowPopup(false)}
+              aria-label="Close"
+              className="tn-focusable absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-[#6b7280] flex items-center justify-center transition-colors duration-150"
+            >
+              <X size={16} />
+            </button>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#dcfce7] text-[#16a34a] flex items-center justify-center mx-auto mb-4">
+              <selectedTask.icon size={26} />
+            </div>
+            <h2 className="text-[17px] sm:text-[19px] font-bold text-[#111827] m-0 mb-2">
+              {selectedTask.title} — Coming Soon
+            </h2>
+            <p className="text-[#6b7280] text-[12px] sm:text-[13px] leading-[19px] m-0 px-1">
+              This task type isn't live yet. We're onboarding verified, trusted
+              partners so every reward you earn here is safe and guaranteed.
+            </p>
+            <div className="flex items-center justify-center gap-1.5 mt-4 mb-5 text-[10px] sm:text-[11px] text-[#166534] font-semibold bg-[#dcfce7] border border-[#bbf7d0] rounded-full px-3 py-[6px] w-fit mx-auto">
+              <ShieldCheck size={13} /> Verified &amp; secure rewards
+            </div>
+            <button
+              onClick={() => setShowPopup(false)}
+              className={`tn-focusable w-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white font-bold py-3 rounded-xl text-[13px] shadow-[0_4px_14px_rgba(34,197,94,0.3)] transition-transform duration-150 hover:-translate-y-0.5 ${FONT}`}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -67,6 +67,149 @@ const CLAMP_2_LINES = {
   overflow: "hidden",
 };
 
+const DESIGN_SYSTEM_CSS = `
+  :root {
+    --brand: #16a34a;
+    --brand-soft: #22c55e;
+    --highlight: #dcfce7;
+    --border: #e5e7eb;
+    --muted: #6b7280;
+    --ink: #111827;
+    --gold: #d97706;
+    --gold-soft: #f59e0b;
+    --gold-bg: #fef3c7;
+    --gold-border: #fcd34d;
+    --bg: #f2f5f3;
+    --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -14px) scale(0.96); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(220%); } }
+  @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes tickerDot { 0%, 100% { opacity: 0.5; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
+  @keyframes spinOnce { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  .tn-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-left: clamp(16px, 4vw, 40px);
+    padding-right: clamp(16px, 4vw, 40px);
+    padding-bottom: clamp(120px, 14vh, 140px);
+    padding-top: 0;
+  }
+
+  .tn-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(242, 245, 243, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding-top: max(clamp(10px, 1.4vw, 16px), env(safe-area-inset-top));
+    padding-bottom: clamp(10px, 1.4vw, 14px);
+    margin-left: calc(clamp(16px, 4vw, 40px) * -1);
+    margin-right: calc(clamp(16px, 4vw, 40px) * -1);
+    margin-bottom: 14px;
+    padding-left: clamp(16px, 4vw, 40px);
+    padding-right: clamp(16px, 4vw, 40px);
+  }
+
+  .tn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(12px, 2vw, 20px);
+  }
+  @media (min-width: 640px) { .tn-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1024px) { .tn-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 340px) { .tn-grid { grid-template-columns: 1fr; } }
+
+  .tn-card {
+    transition: transform 0.35s var(--ease-premium), box-shadow 0.35s var(--ease-premium), border-color 0.35s var(--ease-premium);
+  }
+  @media (hover: hover) {
+    .tn-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 28px rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.45);
+    }
+    .tn-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.32);
+    }
+    .tn-navlink:hover { color: var(--brand); }
+  }
+  .tn-btn, .tn-card, .tn-navlink, .tn-icon-btn { -webkit-tap-highlight-color: transparent; }
+  .tn-btn:active:not(:disabled), .tn-icon-btn:active { transform: scale(0.94); }
+  .tn-focusable:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .tn-title      { font-size: clamp(20px, 1.2vw + 16px, 28px); }
+  .tn-greeting   { font-size: clamp(13px, 0.5vw + 11px, 15px); }
+  .tn-subtext    { font-size: clamp(10px, 0.35vw + 8.5px, 12px); }
+  .tn-hero-title { font-size: clamp(20px, 2vw + 12px, 34px); }
+  .tn-hero-desc  { font-size: clamp(11px, 0.4vw + 9.5px, 13px); line-height: 1.55; }
+  .tn-card-title { font-size: clamp(12px, 0.4vw + 10.5px, 14px); }
+  .tn-card-desc  { font-size: clamp(10px, 0.3vw + 9px, 12px); line-height: 1.45; }
+  .tn-btn-text   { font-size: clamp(10px, 0.3vw + 9px, 12px); }
+  .tn-chip       { font-size: clamp(10px, 0.3vw + 9px, 11.5px); }
+  .tn-nav-label  { font-size: clamp(9px, 0.25vw + 8.5px, 10.5px); }
+  .tn-badge      { font-size: clamp(10px, 0.3vw + 9px, 12px); }
+
+  .tn-icon-badge { width: clamp(34px, 3vw, 40px); height: clamp(34px, 3vw, 40px); }
+  .tn-avatar     { width: clamp(38px, 3.2vw, 44px); height: clamp(38px, 3.2vw, 44px); }
+  .tn-level-pill { min-width: clamp(36px, 3vw, 44px); height: clamp(36px, 3vw, 44px); }
+  .tn-card-min   { min-height: clamp(138px, 15vw, 168px); }
+  .tn-card-pad   { padding: clamp(12px, 1.6vw, 18px); }
+  .tn-icon-tile  { width: clamp(30px, 2.6vw, 36px); height: clamp(30px, 2.6vw, 36px); }
+  .tn-btn-h      { height: clamp(32px, 2.8vw, 38px); }
+  .tn-btn-pad    { padding-left: clamp(12px, 1.2vw, 16px); padding-right: clamp(12px, 1.2vw, 16px); }
+
+  .tn-coin-gold {
+    color: var(--gold);
+    background: linear-gradient(180deg, #fffbeb 0%, var(--gold-bg) 100%);
+    border-color: var(--gold-border) !important;
+  }
+  .tn-coin-gold svg { color: var(--gold); }
+  .tn-coin-gold-pulse {
+    box-shadow: 0 0 16px rgba(217, 119, 6, 0.35) !important;
+    border-color: var(--gold-soft) !important;
+  }
+
+  .tn-ptr {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(17,24,39,0.08);
+    color: var(--brand);
+    font-weight: 700;
+    pointer-events: none;
+    transition: transform 0.2s var(--ease-premium), opacity 0.2s var(--ease-premium);
+  }
+`;
+
+const LOADER_CSS = `
+  @keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes spinRingReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  @keyframes pulseGlow { 0%, 100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+  @keyframes floatCoin { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(180deg); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes dotBounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; } }
+`;
+
 function Home() {
   const location = useLocation();
   const FONT = "font-[Poppins,sans-serif]";
@@ -249,6 +392,11 @@ function Home() {
     }
   }, [loadProfile, refreshing, showPopup]);
 
+  const resetPull = () => {
+    setPullDistance(0);
+    touchStartYRef.current = null;
+  };
+
   const onTouchStart = (e) => {
     if (window.scrollY > 0) return;
     touchStartYRef.current = e.touches[0].clientY;
@@ -256,8 +404,7 @@ function Home() {
   const onTouchMove = (e) => {
     if (touchStartYRef.current == null) return;
     if (window.scrollY > 0) {
-      touchStartYRef.current = null;
-      setPullDistance(0);
+      resetPull();
       return;
     }
     const delta = e.touches[0].clientY - touchStartYRef.current;
@@ -267,9 +414,9 @@ function Home() {
     if (pullDistance > 55) {
       await manualRefresh();
     }
-    setPullDistance(0);
-    touchStartYRef.current = null;
+    resetPull();
   };
+  const onTouchCancel = () => resetPull();
 
   const claimDailyBonus = useCallback(async () => {
     if (bonusClaimedToday || claimingRef.current) return;
@@ -389,17 +536,9 @@ function Home() {
   if (pageLoading) {
     return (
       <div
-        className={`min-h-[100dvh] flex flex-col items-center justify-center text-[#111827] ${FONT} bg-[#FAFBFC]`}
+        className={`min-h-[100dvh] flex flex-col items-center justify-center text-[#111827] ${FONT} bg-[#F2F5F3]`}
       >
-        <style>{`
-          @keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-          @keyframes spinRingReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-          @keyframes pulseGlow { 0%, 100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
-          @keyframes floatCoin { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(180deg); } }
-          @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes dotBounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
-          @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; } }
-        `}</style>
+        <style>{LOADER_CSS}</style>
 
         <div className="relative w-[110px] h-[110px] flex items-center justify-center mb-6">
           <div
@@ -450,143 +589,13 @@ function Home() {
 
   return (
     <div
-      className={`min-h-[100dvh] text-[#111827] ${FONT} bg-[#FAFBFC]`}
+      className={`min-h-[100dvh] text-[#111827] ${FONT} bg-[#F2F5F3]`}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
     >
-      <style>{`
-        :root {
-          --brand: #16a34a;
-          --brand-soft: #22c55e;
-          --highlight: #dcfce7;
-          --border: #e5e7eb;
-          --muted: #6b7280;
-          --ink: #111827;
-          --gold: #d97706;
-          --gold-soft: #f59e0b;
-          --gold-bg: #fef3c7;
-          --gold-border: #fcd34d;
-          --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -14px) scale(0.96); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(220%); } }
-        @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes tickerDot { 0%, 100% { opacity: 0.5; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
-        @keyframes spinOnce { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @media (prefers-reduced-motion: reduce) {
-          * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-        }
-
-        .tn-shell {
-          max-width: 1180px;
-          margin: 0 auto;
-          padding-left: clamp(16px, 4vw, 40px);
-          padding-right: clamp(16px, 4vw, 40px);
-          padding-bottom: clamp(120px, 14vh, 140px);
-          padding-top: 0;
-        }
-
-        /* Sticky header — always at top on laptop + mobile */
-        .tn-header {
-          position: sticky;
-          top: 0;
-          z-index: 50;
-          background: rgba(250, 251, 252, 0.94);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          border-bottom: 1px solid var(--border);
-          padding-top: max(clamp(10px, 1.4vw, 16px), env(safe-area-inset-top));
-          padding-bottom: clamp(10px, 1.4vw, 14px);
-          margin-left: calc(clamp(16px, 4vw, 40px) * -1);
-          margin-right: calc(clamp(16px, 4vw, 40px) * -1);
-          margin-bottom: 14px;
-          padding-left: clamp(16px, 4vw, 40px);
-          padding-right: clamp(16px, 4vw, 40px);
-        }
-
-        .tn-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: clamp(12px, 2vw, 20px);
-        }
-        @media (min-width: 640px) { .tn-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (min-width: 1024px) { .tn-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 340px) { .tn-grid { grid-template-columns: 1fr; } }
-
-        .tn-card {
-          transition: transform 0.35s var(--ease-premium), box-shadow 0.35s var(--ease-premium), border-color 0.35s var(--ease-premium);
-        }
-        @media (hover: hover) {
-          .tn-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 28px rgba(34, 197, 94, 0.16);
-            border-color: rgba(34, 197, 94, 0.45);
-          }
-          .tn-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.32);
-          }
-          .tn-navlink:hover { color: var(--brand); }
-        }
-        .tn-btn, .tn-card, .tn-navlink, .tn-icon-btn { -webkit-tap-highlight-color: transparent; }
-        .tn-btn:active:not(:disabled), .tn-icon-btn:active { transform: scale(0.94); }
-        .tn-focusable:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-
-        .tn-title      { font-size: clamp(20px, 1.2vw + 16px, 28px); }
-        .tn-greeting   { font-size: clamp(13px, 0.5vw + 11px, 15px); }
-        .tn-subtext    { font-size: clamp(10px, 0.35vw + 8.5px, 12px); }
-        .tn-hero-title { font-size: clamp(20px, 2vw + 12px, 34px); }
-        .tn-hero-desc  { font-size: clamp(11px, 0.4vw + 9.5px, 13px); line-height: 1.55; }
-        .tn-card-title { font-size: clamp(12px, 0.4vw + 10.5px, 14px); }
-        .tn-card-desc  { font-size: clamp(10px, 0.3vw + 9px, 12px); line-height: 1.45; }
-        .tn-btn-text   { font-size: clamp(10px, 0.3vw + 9px, 12px); }
-        .tn-chip       { font-size: clamp(10px, 0.3vw + 9px, 11.5px); }
-        .tn-nav-label  { font-size: clamp(9px, 0.25vw + 8.5px, 10.5px); }
-        .tn-badge      { font-size: clamp(10px, 0.3vw + 9px, 12px); }
-
-        .tn-icon-badge { width: clamp(34px, 3vw, 40px); height: clamp(34px, 3vw, 40px); }
-        .tn-avatar     { width: clamp(38px, 3.2vw, 44px); height: clamp(38px, 3.2vw, 44px); }
-        .tn-level-pill { min-width: clamp(36px, 3vw, 44px); height: clamp(36px, 3vw, 44px); }
-        .tn-card-min   { min-height: clamp(138px, 15vw, 168px); }
-        .tn-card-pad   { padding: clamp(12px, 1.6vw, 18px); }
-        .tn-icon-tile  { width: clamp(30px, 2.6vw, 36px); height: clamp(30px, 2.6vw, 36px); }
-        .tn-btn-h      { height: clamp(32px, 2.8vw, 38px); }
-        .tn-btn-pad    { padding-left: clamp(12px, 1.2vw, 16px); padding-right: clamp(12px, 1.2vw, 16px); }
-
-        .tn-coin-gold {
-          color: var(--gold);
-          background: linear-gradient(180deg, #fffbeb 0%, var(--gold-bg) 100%);
-          border-color: var(--gold-border) !important;
-        }
-        .tn-coin-gold svg { color: var(--gold); }
-        .tn-coin-gold-pulse {
-          box-shadow: 0 0 16px rgba(217, 119, 6, 0.35) !important;
-          border-color: var(--gold-soft) !important;
-        }
-
-        .tn-ptr {
-          position: fixed;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 90;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 12px;
-          background: #fff;
-          border: 1px solid var(--border);
-          border-radius: 999px;
-          box-shadow: 0 2px 10px rgba(17,24,39,0.08);
-          color: var(--brand);
-          font-weight: 700;
-          pointer-events: none;
-          transition: transform 0.2s var(--ease-premium), opacity 0.2s var(--ease-premium);
-        }
-      `}</style>
+      <style>{DESIGN_SYSTEM_CSS}</style>
 
       <div
         className="tn-ptr tn-subtext"
@@ -620,7 +629,6 @@ function Home() {
         </div>
 
         <div className="tn-shell relative z-10">
-          {/* Header — sticky, top-aligned on laptop + mobile */}
           <div className="tn-header flex justify-between items-center gap-[10px]">
             <h1 className="tn-title font-extrabold bg-gradient-to-r from-[#16a34a] to-[#111827] bg-clip-text text-transparent m-0 tracking-tight shrink-0">
               Earnzyro
@@ -660,10 +668,9 @@ function Home() {
             </div>
           )}
 
-          {/* Greeting + sync indicator */}
           <div className="flex items-center gap-[10px] mb-3">
             <div className="relative shrink-0">
-              <div className="tn-avatar rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white flex items-center justify-center font-extrabold text-[14px] ring-2 ring-[#dcfce7] ring-offset-2 ring-offset-[#FAFBFC]">
+              <div className="tn-avatar rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white flex items-center justify-center font-extrabold text-[14px] ring-2 ring-[#dcfce7] ring-offset-2 ring-offset-[#F2F5F3]">
                 {initials}
               </div>
             </div>
@@ -702,7 +709,6 @@ function Home() {
             </div>
           )}
 
-          {/* Ticker */}
           <div className="tn-chip bg-[#dcfce7] border border-[#bbf7d0] rounded-xl px-[14px] py-[9px] mb-[16px] flex items-center gap-2 text-[#166534] overflow-hidden">
             <Sparkles
               size={13}
@@ -717,7 +723,6 @@ function Home() {
             </span>
           </div>
 
-          {/* XP card */}
           <div className="bg-white border border-[#e5e7eb] rounded-2xl px-[16px] py-[12px] mb-[16px] flex items-center gap-[12px]">
             <div className="tn-level-pill rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white flex items-center justify-center font-extrabold tn-badge shrink-0">
               Lv{level}
@@ -746,7 +751,6 @@ function Home() {
             </div>
           </div>
 
-          {/* Hero */}
           <div className="relative bg-white border border-[#e5e7eb] rounded-[20px] p-[clamp(16px,2.6vw,32px)] mb-[20px] shadow-[0_1px_3px_rgba(17,24,39,0.04)] overflow-hidden">
             <p className="tn-subtext relative text-[#16a34a] mb-2 font-semibold flex items-center gap-1.5 tracking-wide">
               <Sparkles size={12} /> KEEP GOING
@@ -773,7 +777,6 @@ function Home() {
             </Link>
           </div>
 
-          {/* Cards */}
           <div className="tn-grid relative z-10">
             {cards.map((card, i) => {
               const Icon = card.icon;
@@ -848,31 +851,29 @@ function Home() {
             })}
           </div>
         </div>
+      </div>
 
-        {/* Bottom nav */}
-        <div
-          className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-[420px] bg-white/95 border border-[#e5e7eb] rounded-[22px] flex justify-around items-center shadow-[0_4px_20px_rgba(17,24,39,0.08)] h-[62px]"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`tn-navlink tn-focusable no-underline text-center font-semibold tn-nav-label flex flex-col items-center justify-center gap-[3px] min-w-[48px] h-full rounded-xl transition-all duration-300 ${
-                  isActive
-                    ? "text-[#16a34a] -translate-y-0.5"
-                    : "text-[#6b7280]"
-                }`}
-              >
-                <Icon size={17} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
+      {/* Bottom Nav - OUTSIDE ANIMATION WRAPPER TO FIX SCROLL */}
+      <div
+        className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-[420px] bg-white/95 border border-[#e5e7eb] rounded-[22px] flex justify-around items-center shadow-[0_4px_20px_rgba(17,24,39,0.08)] h-[62px]"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.to;
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`tn-navlink tn-focusable no-underline text-center font-semibold tn-nav-label flex flex-col items-center justify-center gap-[3px] min-w-[48px] h-full rounded-xl transition-all duration-300 ${
+                isActive ? "text-[#16a34a] -translate-y-0.5" : "text-[#6b7280]"
+              }`}
+            >
+              <Icon size={17} />
+              {item.label}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
