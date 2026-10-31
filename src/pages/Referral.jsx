@@ -10,7 +10,6 @@ import {
   Users,
   TrendingUp,
   Flame,
-  Zap,
   Copy,
   Check,
   Share2,
@@ -21,7 +20,125 @@ import {
   MessageCircle,
   ChevronDown,
   Lock,
+  Sparkles,
 } from "lucide-react";
+
+const DESIGN_SYSTEM_CSS = `
+  :root {
+    --brand: #16a34a;
+    --brand-soft: #22c55e;
+    --highlight: #dcfce7;
+    --border: #e5e7eb;
+    --muted: #6b7280;
+    --ink: #111827;
+    --bg: #F2F5F3;
+    --surface: #FCFDFC;
+    --surface-soft: #F6F9F6;
+    --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(220%); } }
+  @keyframes tickerDot { 0%, 100% { opacity: 0.5; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  .rf-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-left: clamp(16px, 4vw, 40px);
+    padding-right: clamp(16px, 4vw, 40px);
+    padding-bottom: clamp(120px, 14vh, 140px);
+    padding-top: 0;
+  }
+
+  .rf-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(242, 245, 243, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding-top: max(clamp(10px, 1.4vw, 16px), env(safe-area-inset-top));
+    padding-bottom: clamp(10px, 1.4vw, 14px);
+    margin-left: calc(clamp(16px, 4vw, 40px) * -1);
+    margin-right: calc(clamp(16px, 4vw, 40px) * -1);
+    margin-bottom: 14px;
+    padding-left: clamp(16px, 4vw, 40px);
+    padding-right: clamp(16px, 4vw, 40px);
+  }
+
+  .rf-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: clamp(14px, 1.8vw, 20px);
+    box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
+    transition: transform 0.35s var(--ease-premium), box-shadow 0.35s var(--ease-premium), border-color 0.35s var(--ease-premium);
+  }
+  .rf-card-hi { border-color: #86efac; }
+
+  @media (hover: hover) {
+    .rf-card:hover {
+      box-shadow: 0 10px 28px rgba(34, 197, 94, 0.10);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+    .rf-btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.32);
+    }
+    .rf-btn-ghost:hover {
+      border-color: rgba(34, 197, 94, 0.45);
+      color: var(--brand);
+    }
+    .rf-stat:hover { border-color: rgba(34, 197, 94, 0.45); transform: translateY(-2px); }
+    .rf-navlink:hover { color: var(--brand); }
+  }
+  .rf-btn-primary:active:not(:disabled),
+  .rf-btn-ghost:active,
+  .rf-navlink:active { transform: scale(0.94); }
+  .rf-focusable:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .rf-title      { font-size: clamp(20px, 1.2vw + 16px, 28px); }
+  .rf-hero-title { font-size: clamp(18px, 1.6vw + 12px, 24px); }
+  .rf-hero-amt   { font-size: clamp(26px, 2.4vw + 14px, 36px); }
+  .rf-card-title { font-size: clamp(12px, 0.4vw + 10.5px, 14px); }
+  .rf-desc       { font-size: clamp(10.5px, 0.3vw + 9px, 12px); line-height: 1.55; }
+  .rf-btn-text   { font-size: clamp(10.5px, 0.3vw + 9.5px, 12px); }
+  .rf-chip       { font-size: clamp(9.5px, 0.3vw + 8.5px, 11px); }
+  .rf-nav-label  { font-size: clamp(9px, 0.25vw + 8.5px, 10.5px); }
+
+  .rf-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(10px, 1.4vw, 14px);
+  }
+  @media (min-width: 640px) {
+    .rf-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+
+  .rf-tier {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .rf-linkbox {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 12px;
+    color: var(--brand);
+    font-size: clamp(10px, 0.3vw + 9px, 11.5px);
+    word-break: break-all;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+`;
 
 function Referral() {
   const location = useLocation();
@@ -63,7 +180,6 @@ function Referral() {
         const referralData = await referralRes.json();
 
         if (referralData.success) {
-          console.log(referralData);
           setReferralsList(referralData.referrals);
         }
       } catch (err) {
@@ -103,11 +219,7 @@ function Referral() {
   ];
 
   const statsData = [
-    {
-      icon: Users,
-      value: stats.totalReferrals,
-      label: "Total Referrals",
-    },
+    { icon: Users, value: stats.totalReferrals, label: "Total Referrals" },
     {
       icon: Hourglass,
       value: stats.pendingReferrals,
@@ -169,7 +281,7 @@ function Referral() {
     },
     {
       title: "Friend joins",
-      desc: "They sign up on TaskNiri using your referral link.",
+      desc: "They sign up on Earnzyro using your referral link.",
     },
     {
       title: "Both earn",
@@ -187,8 +299,8 @@ function Referral() {
     if (navigator.share) {
       navigator
         .share({
-          title: "TaskNiri",
-          text: "Join TaskNiri and earn rewards daily using my referral link.",
+          title: "Earnzyro",
+          text: "Join Earnzyro and earn rewards daily using my referral link.",
           url: referralLink,
         })
         .catch(() => {});
@@ -199,7 +311,7 @@ function Referral() {
 
   const shareOnWhatsApp = () => {
     const text = encodeURIComponent(
-      `Join TaskNiri and earn rewards daily using my referral link: ${referralLink}`,
+      `Join Earnzyro and earn rewards daily using my referral link: ${referralLink}`,
     );
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
@@ -209,838 +321,380 @@ function Referral() {
   };
 
   return (
-    <div className="referral-wrapper">
-      <style>{`
-        * { box-sizing: border-box; }
-
-        .referral-wrapper {
-          min-height: 100vh;
-          padding: 16px;
-          padding-bottom: 105px;
-          color: white;
-          font-family: 'Poppins', sans-serif;
-          background:
-            radial-gradient(circle at bottom left, rgba(255,120,40,0.35), transparent 35%),
-            radial-gradient(circle at top right, rgba(255,140,0,0.22), transparent 28%),
-            linear-gradient(135deg, #050505 0%, #0a0a0a 40%, #120909 100%);
-        }
-
-        .top-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-          gap: 10px;
-        }
-
-        .page-title {
-          font-size: 26px;
-          font-weight: 800;
-          background: linear-gradient(to right,#facc15,#fff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          margin: 0 0 4px 0;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .page-sub {
-          color: #a1a1aa;
-          font-size: 11px;
-          margin: 0;
-        }
-
-        .coin-badge {
-          background: #111;
-          border: 1px solid rgba(250,204,21,0.18);
-          padding: 7px 12px;
-          border-radius: 10px;
-          color: #facc15;
-          font-weight: 700;
-          font-size: 11px;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          flex-shrink: 0;
-        }
-
-        @keyframes cardIn {
-          from { opacity:0; transform:translateY(10px); }
-          to { opacity:1; transform:translateY(0); }
-        }
-
-        .hero-card {
-          background: rgba(17,17,17,0.90);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 22px;
-          padding: 22px 20px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          box-shadow: 0 0 30px rgba(250,204,21,0.05);
-          animation: cardIn 0.4s ease both;
-          position: relative;
-          overflow: hidden;
-          text-align: center;
-        }
-
-        .hero-card::after {
-          content: "";
-          position: absolute;
-          top: -50px;
-          right: -50px;
-          width: 180px;
-          height: 180px;
-          background: radial-gradient(circle, rgba(250,204,21,0.14), transparent 70%);
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .hero-icon {
-          width: 64px;
-          height: 64px;
-          border-radius: 20px;
-          background: linear-gradient(135deg,#facc15,#eab308);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 14px;
-          box-shadow: 0 0 26px rgba(250,204,21,0.3);
-          color: #000;
-        }
-
-        .hero-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          background: rgba(250,204,21,0.10);
-          color: #facc15;
-          padding: 5px 12px;
-          border-radius: 999px;
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.4px;
-          margin-bottom: 12px;
-        }
-
-        .hero-title {
-          font-size: 22px;
-          margin: 0 0 2px;
-          font-weight: 800;
-          color: white;
-        }
-
-        .hero-amount {
-          font-size: 30px;
-          margin: 2px 0 10px;
-          color: #facc15;
-          font-weight: 900;
-          line-height: 1.1;
-        }
-
-        .hero-desc {
-          color: #a1a1aa;
-          font-size: 11px;
-          line-height: 18px;
-          margin: 0 auto 16px;
-          max-width: 320px;
-          position: relative;
-          z-index: 1;
-        }
-
-        .tier-row {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          justify-content: center;
-          position: relative;
-          z-index: 1;
-        }
-
-        .tier-chip {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.08);
-          padding: 8px 12px;
-          border-radius: 12px;
-          font-size: 10px;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
-
-        .tier-chip .amt { color: #facc15; }
-
-        .rules-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 18px;
-          padding: 16px 18px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .rules-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 12px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .rules-list {
-          display: flex;
-          flex-direction: column;
-          gap: 9px;
-        }
-
-        .rule-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 8px;
-          font-size: 11px;
-          color: #d4d4d8;
-          line-height: 16px;
-        }
-
-        .rule-row svg { flex-shrink: 0; margin-top: 1px; }
-
-        .milestone-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 18px;
-          padding: 16px 18px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .milestone-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 10px;
-        }
-
-        .milestone-label {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .milestone-count {
-          font-size: 12px;
-          color: #facc15;
-          font-weight: 700;
-        }
-
-        .progress-track {
-          width: 100%;
-          height: 8px;
-          border-radius: 6px;
-          background: rgba(255,255,255,0.06);
-          overflow: hidden;
-        }
-
-        .progress-fill {
-          height: 100%;
-          border-radius: 6px;
-          background: linear-gradient(90deg,#facc15,#eab308);
-          transition: width 0.5s ease;
-        }
-
-        .milestone-hint {
-          color: #a1a1aa;
-          font-size: 10px;
-          margin: 8px 0 0;
-        }
-
-        .checklist-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 18px;
-          padding: 16px 18px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .checklist-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 12px;
-        }
-
-        .checklist-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 8px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-          font-size: 11px;
-          font-weight: 600;
-        }
-
-        .checklist-row:last-child { border-bottom: none; }
-
-        .checklist-row.done { color: #d4d4d8; }
-        .checklist-row.pending { color: #a1a1aa; }
-        .checklist-row.locked { color: #71717a; }
-
-        .checklist-icon.done { color: #22c55e; }
-        .checklist-icon.pending { color: #facc15; }
-        .checklist-icon.locked { color: #71717a; }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-          margin-bottom: 14px;
-        }
-
-        .stat-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 16px;
-          padding: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .stat-icon {
-          width: 30px;
-          height: 30px;
-          border-radius: 9px;
-          background: rgba(250,204,21,0.1);
-          color: #facc15;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 8px;
-        }
-
-        .stat-value {
-          font-size: 19px;
-          color: #facc15;
-          font-weight: 800;
-          margin: 0 0 2px;
-        }
-
-        .stat-label {
-          font-size: 10px;
-          color: #a1a1aa;
-          margin: 0;
-        }
-
-        .link-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 18px;
-          padding: 16px 18px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .link-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 10px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .link-box {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
-          padding: 11px 12px;
-          color: #facc15;
-          font-size: 10px;
-          word-break: break-all;
-          margin-bottom: 10px;
-        }
-
-        .link-actions {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .link-btn {
-          flex: 1;
-          min-width: 100px;
-          border: none;
-          padding: 10px;
-          border-radius: 10px;
-          font-weight: 700;
-          cursor: pointer;
-          font-size: 11px;
-          font-family: 'Poppins', sans-serif;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          transition: transform 0.15s ease;
-        }
-
-        .link-btn:hover { transform: translateY(-1px); }
-
-        .link-btn.copy {
-          background: rgba(250,204,21,0.10);
-          border: 1px solid rgba(250,204,21,0.2);
-          color: #facc15;
-        }
-
-        .link-btn.share {
-          background: linear-gradient(135deg,#22c55e,#16a34a);
-          color: white;
-          box-shadow: 0 0 16px rgba(34,197,94,0.25);
-        }
-
-        .link-btn.whatsapp {
-          background: rgba(37,211,102,0.12);
-          border: 1px solid rgba(37,211,102,0.3);
-          color: #25d366;
-        }
-
-        .steps-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 18px;
-          padding: 16px 18px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .steps-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 14px;
-        }
-
-        .step-row {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 14px;
-        }
-
-        .step-row:last-child { margin-bottom: 0; }
-
-        .step-num {
-          width: 26px;
-          height: 26px;
-          border-radius: 50%;
-          background: rgba(250,204,21,0.1);
-          color: #facc15;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 11px;
-          font-weight: 800;
-          flex-shrink: 0;
-        }
-
-        .step-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 3px;
-        }
-
-        .step-desc {
-          font-size: 10px;
-          color: #a1a1aa;
-          margin: 0;
-          line-height: 16px;
-        }
-
-        .history-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 18px;
-          padding: 16px 18px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .history-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 12px;
-        }
-
-        .history-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 10px;
-          padding: 10px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .history-row:last-child { border-bottom: none; padding-bottom: 0; }
-
-        .history-name {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 3px;
-        }
-
-        .history-detail {
-          font-size: 10px;
-          color: #a1a1aa;
-          margin: 0;
-          line-height: 15px;
-        }
-
-        .history-badge {
-          font-size: 9px;
-          font-weight: 700;
-          padding: 4px 9px;
-          border-radius: 999px;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-
-        .history-badge.done {
-          background: rgba(34,197,94,0.12);
-          color: #22c55e;
-          border: 1px solid rgba(34,197,94,0.25);
-        }
-
-        .history-badge.pending {
-          background: rgba(250,204,21,0.10);
-          color: #facc15;
-          border: 1px solid rgba(250,204,21,0.2);
-        }
-
-        .faq-card {
-          background: rgba(17,17,17,0.88);
-          border: 1px solid rgba(250,204,21,0.10);
-          border-radius: 18px;
-          padding: 16px 18px;
-          margin-bottom: 14px;
-          backdrop-filter: blur(18px);
-          animation: cardIn 0.4s ease both;
-        }
-
-        .faq-title {
-          font-size: 12px;
-          font-weight: 700;
-          margin: 0 0 12px;
-        }
-
-        .faq-item {
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .faq-item:last-child { border-bottom: none; }
-
-        .faq-question {
-          width: 100%;
-          background: none;
-          border: none;
-          color: white;
-          font-family: 'Poppins', sans-serif;
-          font-size: 11px;
-          font-weight: 700;
-          padding: 11px 0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          cursor: pointer;
-          text-align: left;
-          gap: 8px;
-        }
-
-        .faq-chevron {
-          transition: transform 0.2s ease;
-          flex-shrink: 0;
-          color: #facc15;
-        }
-
-        .faq-chevron.open { transform: rotate(180deg); }
-
-        .faq-answer {
-          font-size: 10px;
-          color: #a1a1aa;
-          line-height: 16px;
-          margin: 0 0 12px;
-          padding-right: 20px;
-        }
-
-        .cta-wrap {
-          display: flex;
-          justify-content: center;
-        }
-
-        .cta-btn {
-          background: linear-gradient(135deg,#22c55e,#16a34a);
-          border: none;
-          padding: 14px 40px;
-          border-radius: 16px;
-          color: white;
-          font-weight: 800;
-          font-size: 13px;
-          cursor: pointer;
-          box-shadow: 0 0 22px rgba(34,197,94,0.3);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-family: 'Poppins', sans-serif;
-          transition: transform 0.15s ease;
-          width: 100%;
-          justify-content: center;
-          max-width: 360px;
-        }
-
-        .cta-btn:hover { transform: translateY(-1px); }
-
-        .bottom-nav {
-          position: fixed;
-          bottom: 15px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 95%;
-          max-width: 440px;
-          height: 64px;
-          background: rgba(17,17,17,0.9);
-          border: 1px solid rgba(250,204,21,0.12);
-          border-radius: 22px;
-          display: flex;
-          justify-content: space-around;
-          align-items: center;
-          backdrop-filter: blur(18px);
-          box-shadow: 0 0 25px rgba(0,0,0,0.35);
-          padding: 0 4px;
-        }
-
-        .nav-item {
-          color: #a1a1aa;
-          text-decoration: none;
-          text-align: center;
-          font-weight: 600;
-          font-size: 9px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 3px;
-          transition: color 0.2s ease, transform 0.2s ease;
-          flex: 1;
-        }
-
-        .nav-item.active {
-          color: #facc15;
-          transform: translateY(-2px);
-        }
-
-        @media (min-width: 640px) {
-          .referral-wrapper { padding: 20px; }
-          .page-title { font-size: 34px; }
-          .stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-          .hero-amount { font-size: 36px; }
-          .hero-title { font-size: 26px; }
-          .nav-item { font-size: 11px; }
-        }
-
-        @media (max-width: 359px) {
-          .hero-amount { font-size: 24px; }
-          .hero-title { font-size: 19px; }
-          .coin-badge { font-size: 10px; padding: 5px 8px; }
-          .cta-btn { font-size: 12px; padding: 12px 24px; }
-        }
-      `}</style>
-
-      <div className="top-bar">
-        <div>
-          <h1 className="page-title">
-            <Gift size={24} color="#facc15" /> Invite & Earn
-          </h1>
-          <p className="page-sub">Grow together, earn together.</p>
-        </div>
-
-        <div className="coin-badge">
-          <TrendingUp size={13} /> ₹850 earned
-        </div>
-      </div>
-
-      <div className="hero-card">
-        <div className="hero-icon">
-          <Users size={30} />
-        </div>
-
-        <div className="hero-eyebrow">
-          <Gift size={11} /> REFER & EARN
-        </div>
-
-        <h2 className="hero-title">Invite Friends & Earn Rewards</h2>
-        <p className="hero-amount">Get 200 Coins</p>
-
-        <p className="hero-desc">
-          Reward unlocks after your friend completes 2 tasks and earns 500
-          coins.
-        </p>
-
-        <div className="tier-row">
-          <div className="tier-chip">
-            <CheckCircle2 size={12} color="#facc15" />
-            You earn <span className="amt">200 coins</span>
-          </div>
-          <div className="tier-chip">
-            <CheckCircle2 size={12} color="#facc15" />
-            Friend earns <span className="amt">100 bonus</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="rules-card">
-        <p className="rules-title">
-          <Gift size={14} color="#facc15" /> Referral Rules
-        </p>
-        <div className="rules-list">
-          {rules.map((r, i) => (
-            <div className="rule-row" key={i}>
-              <CheckCircle2 size={13} color="#22c55e" />
-              <span>{r}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="milestone-card">
-        <div className="milestone-top">
-          <p className="milestone-label">
-            <Flame size={14} color="#facc15" /> Next milestone
-          </p>
-          <span className="milestone-count">
-            {referralCount}/{nextMilestone}
-          </span>
-        </div>
-        <div className="progress-track">
-          <div className="progress-fill" style={{ width: `${progressPct}%` }} />
-        </div>
-        <p className="milestone-hint">
-          Invite {nextMilestone - referralCount} more friends to unlock a ₹
-          {milestoneBonus} bonus.
-        </p>
-      </div>
-
-      <div className="checklist-card">
-        <p className="checklist-title">Referral Progress</p>
-        {progressChecklist.map((item, i) => {
-          const Icon =
-            item.state === "done"
-              ? CheckCircle2
-              : item.state === "pending"
-                ? Hourglass
-                : Lock;
-          return (
-            <div className={`checklist-row ${item.state}`} key={i}>
-              <span>{item.label}</span>
-              <Icon size={14} className={`checklist-icon ${item.state}`} />
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="stats-grid">
-        {statsData.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <div className="stat-card" key={i}>
-              <div className="stat-icon">
-                <Icon size={15} />
+    <div
+      className={`min-h-[100dvh] text-[#111827] font-[Poppins,sans-serif] bg-[#F2F5F3]`}
+    >
+      <style>{DESIGN_SYSTEM_CSS}</style>
+
+      <div
+        className="relative z-0"
+        style={{ animation: "pageFadeIn 0.4s var(--ease-premium) both" }}
+      >
+        <div className="rf-shell relative z-10">
+          {/* ===== Header ===== */}
+          <div className="rf-header flex justify-between items-center gap-[10px]">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Link
+                to="/home"
+                aria-label="Back to Home"
+                className="rf-focusable w-[36px] h-[36px] rounded-[11px] bg-[#FCFDFC] border border-[#e5e7eb] text-[#16a34a] flex items-center justify-center no-underline shrink-0 transition-[transform,border-color] duration-200 hover:border-[#22c55e]/60 active:scale-90"
+              >
+                <HomeIcon size={17} />
+              </Link>
+              <div className="min-w-0">
+                <h1 className="rf-title font-extrabold bg-gradient-to-r from-[#16a34a] to-[#111827] bg-clip-text text-transparent m-0 tracking-tight truncate">
+                  Invite &amp; Earn
+                </h1>
+                <p className="rf-chip text-[#6b7280] m-0 truncate">
+                  Grow together, earn together.
+                </p>
               </div>
-              <p className="stat-value">{s.value}</p>
-              <p className="stat-label">{s.label}</p>
             </div>
-          );
-        })}
-      </div>
+            <div className="rf-chip flex items-center gap-[5px] bg-[#dcfce7] border border-[#bbf7d0] px-[11px] py-[6px] rounded-full text-[#166534] font-bold whitespace-nowrap">
+              <Coins size={11} /> {coins.toLocaleString()}
+            </div>
+          </div>
 
-      <div className="link-card">
-        <p className="link-title">
-          <Link2 size={14} color="#facc15" /> Your referral link
-        </p>
-        <div className="link-box">{referralLink}</div>
-        <div className="link-actions">
-          <button className="link-btn copy" onClick={handleCopy}>
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? "Copied" : "Copy link"}
-          </button>
-          <button className="link-btn whatsapp" onClick={shareOnWhatsApp}>
-            <MessageCircle size={14} /> WhatsApp
-          </button>
-          <button className="link-btn share" onClick={inviteNow}>
-            <Share2 size={14} /> Share now
-          </button>
+          {/* ===== Hero Card ===== */}
+          <div
+            className="rf-card rf-card-hi text-center mb-[16px]"
+            style={{ animation: "cardIn 0.5s var(--ease-premium) both" }}
+          >
+            <div
+              className="w-[64px] h-[64px] rounded-[18px] mx-auto mb-[14px] flex items-center justify-center shadow-[0_4px_20px_rgba(34,197,94,0.3)]"
+              style={{
+                background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                color: "#ffffff",
+              }}
+            >
+              <Users size={30} />
+            </div>
+
+            <div className="rf-chip inline-flex items-center gap-[5px] bg-[#dcfce7] border border-[#bbf7d0] text-[#166534] px-[12px] py-[5px] rounded-full font-bold tracking-wide mb-[12px]">
+              <Gift size={11} /> REFER &amp; EARN
+            </div>
+
+            <h2 className="rf-hero-title font-extrabold text-[#111827] m-0 mb-[4px]">
+              Invite Friends &amp; Earn Rewards
+            </h2>
+            <p className="rf-hero-amt font-black text-[#16a34a] m-0 mb-[10px] leading-[1.1]">
+              Get 200 Coins
+            </p>
+
+            <p className="rf-desc text-[#6b7280] max-w-[320px] mx-auto mb-[16px]">
+              Reward unlocks after your friend completes 2 tasks and earns 500
+              coins.
+            </p>
+
+            <div className="rf-tier">
+              <div className="rf-chip flex items-center gap-[5px] bg-[#F6F9F6] border border-[#e5e7eb] px-[12px] py-[8px] rounded-xl font-bold text-[#111827]">
+                <CheckCircle2 size={12} className="text-[#16a34a]" />
+                You earn <span className="text-[#16a34a]">200 coins</span>
+              </div>
+              <div className="rf-chip flex items-center gap-[5px] bg-[#F6F9F6] border border-[#e5e7eb] px-[12px] py-[8px] rounded-xl font-bold text-[#111827]">
+                <CheckCircle2 size={12} className="text-[#16a34a]" />
+                Friend earns <span className="text-[#16a34a]">100 bonus</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ===== Rules ===== */}
+          <div
+            className="rf-card mb-[16px]"
+            style={{
+              animation: "cardIn 0.5s var(--ease-premium) both",
+              animationDelay: "0.05s",
+            }}
+          >
+            <p className="rf-card-title font-extrabold m-0 mb-3 flex items-center gap-1.5 text-[#16a34a]">
+              <Gift size={14} /> Referral Rules
+            </p>
+            <div className="flex flex-col gap-[9px]">
+              {rules.map((r, i) => (
+                <div
+                  className="rf-desc flex items-start gap-2 text-[#374151] leading-[1.5]"
+                  key={i}
+                >
+                  <CheckCircle2
+                    size={13}
+                    className="text-[#16a34a] shrink-0 mt-[2px]"
+                  />
+                  <span>{r}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ===== Milestone ===== */}
+          <div
+            className="rf-card mb-[16px]"
+            style={{
+              animation: "cardIn 0.5s var(--ease-premium) both",
+              animationDelay: "0.10s",
+            }}
+          >
+            <div className="flex justify-between items-center mb-[10px]">
+              <p className="rf-card-title font-extrabold m-0 flex items-center gap-1.5 text-[#111827]">
+                <Flame size={14} className="text-[#d97706]" /> Next milestone
+              </p>
+              <span className="rf-btn-text text-[#16a34a] font-bold">
+                {referralCount}/{nextMilestone}
+              </span>
+            </div>
+            <div className="w-full h-[8px] rounded-md bg-[#f3f4f6] overflow-hidden">
+              <div
+                className="h-full rounded-md bg-gradient-to-r from-[#22c55e] to-[#16a34a] transition-[width] duration-500 relative overflow-hidden"
+                style={{ width: `${progressPct}%` }}
+              >
+                <span
+                  className="absolute inset-y-0 left-0 w-1/3 bg-white/40 blur-[2px]"
+                  style={{ animation: "shimmer 2.2s ease-in-out infinite" }}
+                />
+              </div>
+            </div>
+            <p className="rf-chip text-[#6b7280] m-0 mt-2">
+              Invite {nextMilestone - referralCount} more friends to unlock a ₹
+              {milestoneBonus} bonus.
+            </p>
+          </div>
+
+          {/* ===== Progress Checklist ===== */}
+          <div
+            className="rf-card mb-[16px]"
+            style={{
+              animation: "cardIn 0.5s var(--ease-premium) both",
+              animationDelay: "0.15s",
+            }}
+          >
+            <p className="rf-card-title font-extrabold m-0 mb-3 text-[#16a34a]">
+              Referral Progress
+            </p>
+            {progressChecklist.map((item, i) => {
+              const Icon =
+                item.state === "done"
+                  ? CheckCircle2
+                  : item.state === "pending"
+                    ? Hourglass
+                    : Lock;
+              const iconColor =
+                item.state === "done"
+                  ? "text-[#16a34a]"
+                  : item.state === "pending"
+                    ? "text-[#d97706]"
+                    : "text-[#9ca3af]";
+              const textColor =
+                item.state === "done"
+                  ? "text-[#374151]"
+                  : item.state === "pending"
+                    ? "text-[#6b7280]"
+                    : "text-[#9ca3af]";
+              return (
+                <div
+                  className={`rf-desc flex items-center justify-between py-2 border-b border-[#e5e7eb] last:border-b-0 font-semibold ${textColor}`}
+                  key={i}
+                >
+                  <span>{item.label}</span>
+                  <Icon size={14} className={iconColor} />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ===== Stats Grid ===== */}
+          <div className="rf-stats mb-[16px]">
+            {statsData.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <div
+                  className="rf-stat rf-card p-[14px] transition-all duration-200"
+                  key={i}
+                  style={{
+                    animation: `cardIn 0.5s var(--ease-premium) both`,
+                    animationDelay: `${0.2 + i * 0.04}s`,
+                  }}
+                >
+                  <div className="w-[30px] h-[30px] rounded-[9px] bg-[#dcfce7] text-[#16a34a] flex items-center justify-center mb-2">
+                    <Icon size={15} />
+                  </div>
+                  <p className="text-[19px] text-[#16a34a] font-extrabold m-0 mb-[2px]">
+                    {s.value}
+                  </p>
+                  <p className="rf-chip text-[#6b7280] m-0">{s.label}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ===== Referral Link ===== */}
+          <div
+            className="rf-card mb-[16px]"
+            style={{
+              animation: "cardIn 0.5s var(--ease-premium) both",
+              animationDelay: "0.35s",
+            }}
+          >
+            <p className="rf-card-title font-extrabold m-0 mb-2.5 flex items-center gap-1.5 text-[#16a34a]">
+              <Link2 size={14} /> Your referral link
+            </p>
+            <div className="rf-linkbox">{referralLink || "Loading…"}</div>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={handleCopy}
+                className="rf-btn-ghost rf-btn-text flex-1 min-w-[100px] py-[10px] rounded-full font-bold cursor-pointer font-[Poppins,sans-serif] flex items-center justify-center gap-[6px] bg-[#F6F9F6] border border-[#e5e7eb] text-[#16a34a] transition-all duration-150"
+              >
+                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? "Copied" : "Copy link"}
+              </button>
+              <button
+                onClick={shareOnWhatsApp}
+                className="rf-btn-ghost rf-btn-text flex-1 min-w-[100px] py-[10px] rounded-full font-bold cursor-pointer font-[Poppins,sans-serif] flex items-center justify-center gap-[6px] bg-[#F6F9F6] border border-[#e5e7eb] text-[#16a34a] transition-all duration-150"
+              >
+                <MessageCircle size={14} /> WhatsApp
+              </button>
+              <button
+                onClick={inviteNow}
+                className="rf-btn-primary rf-btn-text flex-1 min-w-[100px] py-[10px] rounded-full font-bold cursor-pointer font-[Poppins,sans-serif] flex items-center justify-center gap-[6px] border-none bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white shadow-[0_6px_18px_rgba(34,197,94,0.28)] transition-transform duration-150"
+              >
+                <Share2 size={14} /> Share now
+              </button>
+            </div>
+          </div>
+
+          {/* ===== How it works ===== */}
+          <div
+            className="rf-card mb-[16px]"
+            style={{
+              animation: "cardIn 0.5s var(--ease-premium) both",
+              animationDelay: "0.40s",
+            }}
+          >
+            <p className="rf-card-title font-extrabold m-0 mb-3 flex items-center gap-1.5 text-[#16a34a]">
+              <Sparkles size={14} /> How it works
+            </p>
+            {steps.map((s, i) => (
+              <div key={i} className="flex gap-3 mb-[14px] last:mb-0">
+                <div className="w-[26px] h-[26px] rounded-full bg-[#dcfce7] text-[#16a34a] flex items-center justify-center text-[11px] font-extrabold shrink-0">
+                  {i + 1}
+                </div>
+                <div>
+                  <p className="rf-card-title font-bold m-0 mb-1 text-[#111827]">
+                    {s.title}
+                  </p>
+                  <p className="rf-chip text-[#6b7280] m-0 leading-[1.5]">
+                    {s.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ===== History ===== */}
+          <div
+            className="rf-card mb-[16px]"
+            style={{
+              animation: "cardIn 0.5s var(--ease-premium) both",
+              animationDelay: "0.45s",
+            }}
+          >
+            <p className="rf-card-title font-extrabold m-0 mb-3 text-[#16a34a]">
+              Referral History
+            </p>
+            {history.length === 0 ? (
+              <p className="rf-desc text-[#6b7280] m-0">
+                No referrals yet — invite your first friend to start earning!
+              </p>
+            ) : (
+              history.map((h, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between items-start gap-2.5 py-2.5 border-b border-[#e5e7eb] last:border-b-0 last:pb-0"
+                >
+                  <div className="min-w-0">
+                    <p className="rf-card-title font-bold m-0 mb-1 text-[#111827]">
+                      {h.name}
+                    </p>
+                    <p className="rf-chip text-[#6b7280] m-0 leading-[1.5]">
+                      {h.detail}
+                    </p>
+                  </div>
+                  <span
+                    className={`rf-chip font-bold px-[9px] py-1 rounded-full whitespace-nowrap shrink-0 ${
+                      h.state === "done"
+                        ? "bg-[#dcfce7] border border-[#bbf7d0] text-[#166534]"
+                        : "bg-[#fef3c7] border border-[#fcd34d] text-[#d97706]"
+                    }`}
+                  >
+                    {h.status}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* ===== FAQ ===== */}
+          <div
+            className="rf-card mb-[16px]"
+            style={{
+              animation: "cardIn 0.5s var(--ease-premium) both",
+              animationDelay: "0.50s",
+            }}
+          >
+            <p className="rf-card-title font-extrabold m-0 mb-3 text-[#16a34a]">
+              Frequently Asked Questions
+            </p>
+            {faqs.map((f, i) => (
+              <div
+                key={i}
+                className="border-b border-[#e5e7eb] last:border-b-0"
+              >
+                <button
+                  onClick={() => toggleFaq(i)}
+                  className="w-full bg-transparent border-none text-[#111827] font-[Poppins,sans-serif] rf-card-title font-bold py-[11px] px-0 flex justify-between items-center cursor-pointer text-left gap-2"
+                >
+                  {f.q}
+                  <ChevronDown
+                    size={15}
+                    className={`text-[#16a34a] shrink-0 transition-transform duration-200 ${
+                      openFaq === i ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {openFaq === i && (
+                  <p className="rf-chip text-[#6b7280] leading-[1.6] m-0 pb-3 pr-5 animate-[fadeIn_0.25s_ease]">
+                    {f.a}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* ===== CTA ===== */}
+          <div className="flex justify-center mb-[16px]">
+            <button
+              onClick={inviteNow}
+              className="rf-btn-primary rf-btn-text w-full max-w-[360px] py-[14px] rounded-full font-extrabold font-[Poppins,sans-serif] cursor-pointer border-none flex items-center justify-center gap-2 bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white shadow-[0_6px_18px_rgba(34,197,94,0.3)] transition-transform duration-150"
+            >
+              <Share2 size={16} /> Invite now
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="steps-card">
-        <p className="steps-title">How it works</p>
-        {steps.map((s, i) => (
-          <div className="step-row" key={i}>
-            <div className="step-num">{i + 1}</div>
-            <div>
-              <p className="step-title">{s.title}</p>
-              <p className="step-desc">{s.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="history-card">
-        <p className="history-title">Referral History</p>
-        {history.map((h, i) => (
-          <div className="history-row" key={i}>
-            <div>
-              <p className="history-name">{h.name}</p>
-              <p className="history-detail">{h.detail}</p>
-            </div>
-            <span className={`history-badge ${h.state}`}>{h.status}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="faq-card">
-        <p className="faq-title">Frequently Asked Questions</p>
-        {faqs.map((f, i) => (
-          <div className="faq-item" key={i}>
-            <button className="faq-question" onClick={() => toggleFaq(i)}>
-              {f.q}
-              <ChevronDown
-                size={15}
-                className={`faq-chevron ${openFaq === i ? "open" : ""}`}
-              />
-            </button>
-            {openFaq === i && <p className="faq-answer">{f.a}</p>}
-          </div>
-        ))}
-      </div>
-
-      <div className="cta-wrap">
-        <button className="cta-btn" onClick={inviteNow}>
-          <Share2 size={16} /> Invite now
-        </button>
-      </div>
-
-      <div className="bottom-nav">
+      {/* ===== Bottom Nav ===== */}
+      <div
+        className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-[440px] bg-[#FCFDFC]/95 border border-[#e5e7eb] rounded-[22px] flex justify-around items-center shadow-[0_4px_20px_rgba(17,24,39,0.08)] h-[62px]"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isActive = location.pathname === item.to;
           return (
             <Link
               key={item.to}
               to={item.to}
-              className={`nav-item ${location.pathname === item.to ? "active" : ""}`}
+              className={`rf-navlink rf-focusable no-underline text-center font-semibold rf-nav-label flex flex-col items-center justify-center gap-[3px] min-w-[48px] h-full rounded-xl transition-all duration-300 ${
+                isActive ? "text-[#16a34a] -translate-y-0.5" : "text-[#6b7280]"
+              }`}
             >
               <Icon size={17} />
               {item.label}
